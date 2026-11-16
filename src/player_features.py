@@ -1,80 +1,136 @@
+"""
+Multi-position feature engineering module for NFL player yardage projections.
+
+Used by both `train_player_model.py` (historical training) and `predict_players.py`
+(live Sunday inference) to build identical, leak-free feature tables for:
+  1. WR/TE Receiving Yards
+  2. QB Passing Yards
+  3. RB Rushing Yards
+"""
+
 import nflreadpy as nfl
 import numpy as np
 import pandas as pd
 
+# Feature Lists (Exact ordered columns expected by each position's Ridge model)
 WR_TE_FEATURES = [
-    "ewma5_rec_yards",
-    "ewma5_targets",
-    "ewma5_receptions",
-    "ewma5_target_share",
-    "ewma5_air_yards_share",
-    "ewma5_rec_epa",
-    "opp_ewma8_wr_te_yards_allowed",
-    "opp_ewma8_def_pass_epa",
-    "implied_team_total",
-    "is_home",
-    "is_wr",
+    "ewma5_rec_yards",                # 5-game rolling receiving yards
+    "ewma5_targets",                  # 5-game rolling targets per game
+    "ewma5_receptions",               # 5-game rolling catches per game
+    "ewma5_target_share",             # 5-game rolling % of team pass attempts aimed at player
+    "ewma5_air_yards_share",          # 5-game rolling % of team air yards (deep-threat usage)
+    "ewma5_rec_epa",                  # 5-game rolling receiving Expected Points Added
+    "opp_ewma8_wr_te_yards_allowed",  # Opponent defense's 8-game rolling WR/TE yards allowed
+    "opp_ewma8_def_pass_epa",         # Opponent defense's 8-game rolling pass EPA allowed
+    "implied_team_total",             # Vegas-implied points scored by the player's team
+    "is_home",                        # 1 if playing in home stadium, 0 if road/neutral
+    "is_wr",                          # 1 if Wide Receiver, 0 if Tight End
 ]
 
 QB_FEATURES = [
-    "ewma5_pass_yards",
-    "ewma5_attempts",
-    "ewma5_completions",
-    "ewma5_pass_epa",
-    "ewma5_yards_per_attempt",
-    "opp_ewma8_pass_yards_allowed",
-    "opp_ewma8_def_pass_epa",
-    "implied_team_total",
-    "team_spread",
-    "is_home",
+    "ewma5_pass_yards",               # 5-game rolling passing yards
+    "ewma5_attempts",                 # 5-game rolling pass attempts per game
+    "ewma5_completions",              # 5-game rolling completions per game
+    "ewma5_pass_epa",                 # 5-game rolling passing EPA
+    "ewma5_yards_per_attempt",        # 5-game rolling passing efficiency (YPA)
+    "opp_ewma8_pass_yards_allowed",   # Opponent defense's 8-game rolling QB passing yards allowed
+    "opp_ewma8_def_pass_epa",         # Opponent defense's 8-game rolling pass EPA allowed
+    "implied_team_total",             # Vegas-implied team points (higher = more passing upside)
+    "team_spread",                    # Point spread (+ = favored, - = underdog needing to throw)
+    "is_home",                        # 1 if home stadium, 0 if road/neutral
 ]
 
 RB_FEATURES = [
-    "ewma5_rush_yards",
-    "ewma5_carries",
-    "ewma5_rush_epa",
-    "ewma5_yards_per_carry",
-    "ewma5_targets",
-    "opp_ewma8_rush_yards_allowed",
-    "opp_ewma8_def_run_epa",
-    "implied_team_total",
-    "team_spread",
-    "is_home",
+    "ewma5_rush_yards",               # 5-game rolling rushing yards
+    "ewma5_carries",                  # 5-game rolling rushing attempts per game
+    "ewma5_rush_epa",                 # 5-game rolling rushing EPA
+    "ewma5_yards_per_carry",          # 5-game rolling rushing efficiency (YPC)
+    "ewma5_targets",                  # 5-game rolling receiving targets (proxy for 3-down snap share)
+    "opp_ewma8_rush_yards_allowed",   # Opponent defense's 8-game rolling RB rushing yards allowed
+    "opp_ewma8_def_run_epa",          # Opponent defense's 8-game rolling run EPA allowed
+    "implied_team_total",             # Vegas-implied team points
+    "team_spread",                    # Point spread (favored teams run more late in games)
+    "is_home",                        # 1 if home stadium, 0 if road/neutral
 ]
 
-def _add_rolling_ewma(df: pd.DataFrame, group_col: str, cols: list[str], span: int, shift: bool, prefix: str) -> pd.DataFrame:
+def _add_rolling_ewma(
+    df: pd.DataFrame,
+    group_col: str,
+    cols: list[str],
+    span: int,
+    shift: bool,
+    prefix: str,
+) -> pd.DataFrame:
+    """
+    Helper to compute Exponentially Weighted Moving Averages (EWMA) per player or defense.
+
+    Args:
+        df: Input DataFrame sorted chronologically by `group_col`, `season`, `week`.
+        group_col: Entity ID to group by (e.g., `player_id` or `def_team`).
+        cols: Raw stat columns to smooth.
+        span: EWMA decay window (5 games for player usage, 8 games for opponent defense).
+        shift: If True, shifts by 1 game so Week N only uses stats through Week N-1 (training).
+               If False, uses all played games through last week (live Sunday predictions).
+        prefix: Column name prefix for the generated rolling features.
+    """
     for col in cols:
         grouped = df.groupby(group_col)[col]
         if shift:
-            df[f"{prefix}{col}"] = grouped.transform(lambda s: s.shift(1).ewm(span=span, min_periods=1).mean())
+            df[f"{prefix}{col}"] = grouped.transform(
+                lambda s: s.shift(1).ewm(span=span, min_periods=1).mean()
+            )
         else:
-            df[f"{prefix}{col}"] = grouped.transform(lambda s: s.ewm(span=span, min_periods=1).mean())
+            df[f"{prefix}{col}"] = grouped.transform(
+                lambda s: s.ewm(span=span, min_periods=1).mean()
+            )
     return df
 
 def _build_game_environment(schedules: pd.DataFrame) -> pd.DataFrame:
+    """
+    Converts game-level Vegas totals and point spreads into team-level game scripts.
+
+    Formula:
+        In nflverse schedules, `spread_line > 0` means the HOME team is favored.
+        - Home Implied Points = (Total + Spread) / 2
+        - Away Implied Points = (Total - Spread) / 2
+    """
     reg = schedules[schedules["game_type"] == "REG"][
         ["season", "week", "home_team", "away_team", "spread_line", "total_line", "location"]
     ].copy()
 
-    # Positive spread_line = home team favored
     reg["home_implied_total"] = (reg["total_line"] + reg["spread_line"]) / 2.0
     reg["away_implied_total"] = (reg["total_line"] - reg["spread_line"]) / 2.0
 
+    # Build home team environment rows
     home = reg[["season", "week", "home_team", "home_implied_total", "spread_line", "location"]].rename(
-        columns={"home_team": "team", "home_implied_total": "implied_team_total", "spread_line": "team_spread"}
+        columns={
+            "home_team": "team",
+            "home_implied_total": "implied_team_total",
+            "spread_line": "team_spread",
+        }
     )
     home["is_home"] = (home["location"] == "Home").astype(int)
 
+    # Build away team environment rows (flip spread sign so + always means favored)
     away = reg[["season", "week", "away_team", "away_implied_total", "spread_line"]].rename(
         columns={"away_team": "team", "away_implied_total": "implied_team_total"}
     )
     away["team_spread"] = -away["spread_line"]
     away["is_home"] = 0
 
-    return pd.concat([home.drop(columns=["location"]), away.drop(columns=["spread_line"])], ignore_index=True)
+    return pd.concat(
+        [home.drop(columns=["location"]), away.drop(columns=["spread_line"])],
+        ignore_index=True,
+    )
 
 def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> dict[str, pd.DataFrame]:
-    """Builds leak-free feature tables for WR/TE receiving, QB passing, and RB rushing."""
+    """
+    Constructs clean, leak-free feature DataFrames for WR/TE, QB, and RB yardage models.
+
+    Returns:
+        Dictionary with keys `"WR_TE"`, `"QB"`, and `"RB"`, each mapping to a DataFrame
+        containing smoothed player stats, opponent defensive generosity, and game script.
+    """
     pstats = nfl.load_player_stats(seasons).to_pandas()
     pbp = nfl.load_pbp(seasons).to_pandas()
     schedules = nfl.load_schedules(seasons).to_pandas()
@@ -82,8 +138,10 @@ def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> d
     reg_stats = pstats[pstats["season_type"] == "REG"].copy()
     env_df = _build_game_environment(schedules)
 
-    # Opponent Defensive Metrics from PBP & Box Scores
+    # Opponent Defensive Generosity Metrics (8-Game Rolling Window)
     plays = pbp[(pbp["season_type"] == "REG") & (pbp["play_type"].isin(["pass", "run"]))].copy()
+
+    # Defensive EPA allowed per pass and per run play
     def_epa = (
         plays.groupby(["season", "week", "defteam", "play_type"])["epa"]
         .mean()
@@ -93,6 +151,7 @@ def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> d
         .rename(columns={"defteam": "def_team"})
     )
 
+    # Total actual yards surrendered by each defense per game by position group
     wr_te_allowed = (
         reg_stats[reg_stats["position"].isin(["WR", "TE"])]
         .groupby(["season", "week", "opponent_team"])["receiving_yards"]
@@ -126,36 +185,47 @@ def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> d
     def_df = _add_rolling_ewma(def_df, "def_team", def_cols, span=8, shift=shift_for_training, prefix="opp_ewma8_")
     opp_keep = ["season", "week", "def_team"] + [f"opp_ewma8_{c}" for c in def_cols]
 
-    # WR/TE Receiving Dataset
+    # WR / TE Receiving Dataset
+
     wr_te = reg_stats[reg_stats["position"].isin(["WR", "TE"])].copy()
     for c in ["receiving_yards", "targets", "receptions", "target_share", "air_yards_share", "receiving_epa"]:
         wr_te[c] = wr_te[c].fillna(0.0)
     wr_te = wr_te.rename(columns={"receiving_yards": "rec_yards", "receiving_epa": "rec_epa"})
     wr_te = wr_te.sort_values(["player_id", "season", "week"]).reset_index(drop=True)
+
     wr_te = _add_rolling_ewma(
-        wr_te, "player_id",
+        wr_te,
+        "player_id",
         ["rec_yards", "targets", "receptions", "target_share", "air_yards_share", "rec_epa"],
-        span=5, shift=shift_for_training, prefix="ewma5_"
+        span=5,
+        shift=shift_for_training,
+        prefix="ewma5_",
     )
     wr_te = (
         wr_te.merge(def_df[opp_keep], left_on=["season", "week", "opponent_team"], right_on=["season", "week", "def_team"], how="left")
         .merge(env_df, on=["season", "week", "team"], how="left")
     )
+    # Fallback to league-average implied total (22.5) if betting lines aren't posted yet
     wr_te["implied_team_total"] = wr_te["implied_team_total"].fillna(22.5)
     wr_te["is_home"] = wr_te["is_home"].fillna(0)
     wr_te["is_wr"] = (wr_te["position"] == "WR").astype(int)
 
     # QB Passing Dataset
+
     qbs = reg_stats[reg_stats["position"] == "QB"].copy()
     for c in ["passing_yards", "attempts", "completions", "passing_epa"]:
         qbs[c] = qbs[c].fillna(0.0)
     qbs["yards_per_attempt"] = np.where(qbs["attempts"] > 0, qbs["passing_yards"] / qbs["attempts"], 0.0)
     qbs = qbs.rename(columns={"passing_yards": "pass_yards", "passing_epa": "pass_epa"})
     qbs = qbs.sort_values(["player_id", "season", "week"]).reset_index(drop=True)
+
     qbs = _add_rolling_ewma(
-        qbs, "player_id",
+        qbs,
+        "player_id",
         ["pass_yards", "attempts", "completions", "pass_epa", "yards_per_attempt"],
-        span=5, shift=shift_for_training, prefix="ewma5_"
+        span=5,
+        shift=shift_for_training,
+        prefix="ewma5_",
     )
     qbs = (
         qbs.merge(def_df[opp_keep], left_on=["season", "week", "opponent_team"], right_on=["season", "week", "def_team"], how="left")
@@ -166,16 +236,21 @@ def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> d
     qbs["is_home"] = qbs["is_home"].fillna(0)
 
     # RB Rushing Dataset
+
     rbs = reg_stats[reg_stats["position"] == "RB"].copy()
     for c in ["rushing_yards", "carries", "rushing_epa", "targets"]:
         rbs[c] = rbs[c].fillna(0.0)
     rbs["yards_per_carry"] = np.where(rbs["carries"] > 0, rbs["rushing_yards"] / rbs["carries"], 0.0)
     rbs = rbs.rename(columns={"rushing_yards": "rush_yards", "rushing_epa": "rush_epa"})
     rbs = rbs.sort_values(["player_id", "season", "week"]).reset_index(drop=True)
+
     rbs = _add_rolling_ewma(
-        rbs, "player_id",
+        rbs,
+        "player_id",
         ["rush_yards", "carries", "rush_epa", "yards_per_carry", "targets"],
-        span=5, shift=shift_for_training, prefix="ewma5_"
+        span=5,
+        shift=shift_for_training,
+        prefix="ewma5_",
     )
     rbs = (
         rbs.merge(def_df[opp_keep], left_on=["season", "week", "opponent_team"], right_on=["season", "week", "def_team"], how="left")

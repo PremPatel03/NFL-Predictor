@@ -1,85 +1,137 @@
+"""
+Weekly Sunday morning NFL game win-probability prediction script (v3).
+
+Runs on Sunday morning (11:40 AM EST via GitHub Actions) or manually via CLI:
+   Loads the pre-game Elo & rolling EPA snapshot created by `build_features.py`.
+   Queries ESPN's live scoreboard and game summary APIs to check if either team's
+     projected starting QB has been ruled Out/Inactive before kickoff.
+   Runs the trained Logistic Regression pipeline (`models/nfl_win_prob_v3.joblib`)
+     to output calibrated win probabilities for every matchup on the slate.
+   Saves the results to `data/latest_predictions.csv` so GitHub Actions can auto-commit them.
+"""
+
 import joblib
+import nflreadpy as nfl
+import numpy as np
 import pandas as pd
 import requests
 
+# ESPN public scoreboard & game summary endpoints for live Sunday morning injury reports
 SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
 SUMMARY_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary"
 
-ESPN_TO_NFLVERSE = {
-    "WSH": "WAS",
-    "LAR": "LA",
-}
+# Map ESPN team abbreviations to nflverse standard abbreviations where they differ
+ESPN_TO_NFLVERSE = {"WSH": "WAS", "LAR": "LA"}
 
-def get_injured_qbs_by_team() -> dict[str, set[str]]:
-    """Returns a mapping of team_abbr -> set of lowercase QB names listed Out/IR."""
-    print("Checking live ESPN injury reports...")
-    sb = requests.get(SCOREBOARD_URL, timeout=15).json()
-    team_out_qbs: dict[str, set[str]] = {}
+def get_live_qb_outs(slate: pd.DataFrame) -> dict[str, int]:
+    """
+    Checks ESPN's live injury report for each game on the current week's slate
+    and returns a dictionary mapping each team abbreviation to `1` if its listed
+    starting QB is officially Out/Inactive, or `0` otherwise.
+
+    Why starter-filtered:
+        Ignoring backup/3rd-string QB injuries prevents false alarms when a depth QB
+        is inactive while the actual QB1 is healthy and starting.
+    """
+    # Build a lookup of each team's expected starting QB from the nflverse schedule
+    expected_starters: dict[str, str] = {}
+    for _, row in slate.iterrows():
+        if pd.notna(row.get("home_qb_name")):
+            expected_starters[row["home_team"]] = str(row["home_qb_name"]).strip().lower()
+        if pd.notna(row.get("away_qb_name")):
+            expected_starters[row["away_team"]] = str(row["away_qb_name"]).strip().lower()
+
+    qb_out_flags: dict[str, int] = {team: 0 for team in expected_starters}
+
+    try:
+        sb = requests.get(SCOREBOARD_URL, timeout=15).json()
+    except Exception as exc:
+        print(f"Warning: Could not reach ESPN scoreboard API ({exc}). Defaulting QB flags to 0.")
+        return qb_out_flags
 
     for event in sb.get("events", []):
-        event_id = event["id"]
-        summary = requests.get(SUMMARY_URL, params={"event": event_id}, timeout=15).json()
+        try:
+            summary = requests.get(SUMMARY_URL, params={"event": event["id"]}, timeout=15).json()
+        except Exception:
+            continue
 
         for team_block in summary.get("injuries", []):
-            raw_abbr = team_block["team"]["abbreviation"]
+            raw_abbr = str(team_block.get("team", {}).get("abbreviation") or "")
             team_abbr = ESPN_TO_NFLVERSE.get(raw_abbr, raw_abbr)
-            out_names = set()
+            starter_name = expected_starters.get(team_abbr, "")
+
+            if not starter_name:
+                continue
 
             for item in team_block.get("injuries", []):
-                status = item.get("status", "").lower()
-                athlete = item.get("athlete", {})
-                pos = athlete.get("position", {}).get("abbreviation", "")
-                name = athlete.get("displayName", "").strip().lower()
+                pos = item.get("athlete", {}).get("position", {}).get("abbreviation", "")
+                status = item.get("status", "").strip().lower()
+                player_name = item.get("athlete", {}).get("displayName", "").strip().lower()
 
+                # Flag only if a QB matching the team's expected starter is Out/Inactive
                 if pos == "QB" and status in {"out", "inactive", "injured reserve"}:
-                    out_names.add(name)
+                    if player_name == starter_name:
+                        qb_out_flags[team_abbr] = 1
 
-            for team_block in summary.get("injuries", []):
-                raw_abbr = str(team_block["team"]["abbreviation"])
-            team_abbr = ESPN_TO_NFLVERSE.get(raw_abbr) or raw_abbr
-            out_names = set()
+    return qb_out_flags
 
-    return team_out_qbs
-
-def is_starter_out(team_abbr: str, starter_name: str, out_map: dict[str, set[str]]) -> int:
-    if not isinstance(starter_name, str) or not starter_name.strip():
-        return 0
-    injured_qbs = out_map.get(team_abbr, set())
-    return int(starter_name.strip().lower() in injured_qbs)
-
-def run_predictions():
-    slate = pd.read_parquet("data/pregame_features.parquet")
-    out_map = get_injured_qbs_by_team()
-
-    slate["home_qb_out"] = slate.apply(
-        lambda r: is_starter_out(r["home_team"], r.get("home_qb_name", ""), out_map), axis=1
-    )
-    slate["away_qb_out"] = slate.apply(
-        lambda r: is_starter_out(r["away_team"], r.get("away_qb_name", ""), out_map), axis=1
-    )
-
+def run_sunday_predictions() -> pd.DataFrame:
+    """
+    Loads the pregame feature snapshot, injects live Sunday QB injury flags,
+    computes calibrated win probabilities with `nfl_win_prob_v3.joblib`,
+    prints the weekly matchup table, and writes `data/latest_predictions.csv`.
+    """
+    # 1. Load the trained v3 model artifact and its exact ordered feature list
     artifact = joblib.load("models/nfl_win_prob_v3.joblib")
     model = artifact["model"]
     feature_cols = artifact["features"]
 
-    slate["home_win_prob"] = model.predict_proba(slate[feature_cols])[:, 1]
-    slate["away_win_prob"] = 1.0 - slate["home_win_prob"]
-    slate["predicted_winner"] = slate.apply(
-        lambda r: r["home_team"] if r["home_win_prob"] >= 0.5 else r["away_team"], axis=1
+    # Load the pre-game feature snapshot built earlier by `build_features.py`
+    slate = pd.read_parquet("data/pregame_features.parquet")
+
+    if slate.empty:
+        print("No games found in data/pregame_features.parquet for the active week.")
+        return slate
+
+    # Query ESPN for live Sunday morning starting QB inactive status
+    qb_outs = get_live_qb_outs(slate)
+    slate["home_qb_out"] = slate["home_team"].map(qb_outs).fillna(0).astype(int)
+    slate["away_qb_out"] = slate["away_team"].map(qb_outs).fillna(0).astype(int)
+
+    # 4. Predict calibrated home win probabilities (class 1 = home_win)
+    X_live = slate[feature_cols].fillna(0.0)
+    home_probs = model.predict_proba(X_live)[:, 1]
+
+    slate["home_win_prob"] = (home_probs * 100).round(1)
+    slate["away_win_prob"] = ((1.0 - home_probs) * 100).round(1)
+    slate["predicted_winner"] = np.where(
+        home_probs >= 0.5, slate["home_team"], slate["away_team"]
     )
-    slate["confidence"] = slate[["home_win_prob", "away_win_prob"]].max(axis=1)
+    slate["win_confidence"] = np.maximum(slate["home_win_prob"], slate["away_win_prob"])
 
-    display_cols = [
-        "gameday", "gametime", "away_team", "home_team",
-        "predicted_winner", "confidence", "home_qb_out", "away_qb_out",
+    # Format clean output table sorted by highest model confidence
+    output_cols = [
+        "gameday",
+        "away_team",
+        "home_team",
+        "predicted_winner",
+        "win_confidence",
+        "home_win_prob",
+        "away_win_prob",
+        "elo_diff",
+        "home_qb_out",
+        "away_qb_out",
     ]
-    results = slate[display_cols].sort_values(["gameday", "gametime"])
+    available_cols = [c for c in output_cols if c in slate.columns]
+    results = slate[available_cols].sort_values("win_confidence", ascending=False).reset_index(drop=True)
 
-    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED) ===")
-    print(results.to_string(index=False, formatters={"confidence": "{:.1%}".format}))
-
+    # Save to CSV so GitHub Actions automatically commits the updated picks to the repo
     results.to_csv("data/latest_predictions.csv", index=False)
+
+    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED v3) ===")
+    print(results.to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
+    return results
 
 if __name__ == "__main__":
-    run_predictions()
+    run_sunday_predictions()
