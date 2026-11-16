@@ -2,17 +2,15 @@ name: Sunday NFL Prediction Pipeline
 
 on:
   schedule:
-    # 8:00 AM EST (13:00 UTC)
     - cron: "0 13 * * 0"
-    # 11:40 AM EST (16:40 UTC)
     - cron: "40 16 * * 0"
-  workflow_dispatch: # Allows manual one-click runs anytime
+  workflow_dispatch:
 
 jobs:
   predict:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Lets the bot commit updated CSVs back to main
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -24,15 +22,14 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install nflreadpy pandas numpy scikit-learn joblib pyarrow requests
+        run: pip install nflreadpy pandas numpy scikit-learn joblib pyarrow requests
 
       - name: Build pregame features
-        run: python src/build_features.py
+        run: PYTHONPATH=src python src/build_features.py
 
       - name: Run Sunday predictions
         if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
-        run: python src/predict_sunday.py
+        run: PYTHONPATH=src python src/predict_sunday.py
 
       - name: Commit updated predictions to GitHub
         if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
