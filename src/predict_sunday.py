@@ -34,7 +34,10 @@ def get_injured_qbs_by_team() -> dict[str, set[str]]:
                 if pos == "QB" and status in {"out", "inactive", "injured reserve"}:
                     out_names.add(name)
 
-            team_out_qbs[team_abbr] = out_names
+            for team_block in summary.get("injuries", []):
+                raw_abbr = str(team_block["team"]["abbreviation"])
+            team_abbr = ESPN_TO_NFLVERSE.get(raw_abbr) or raw_abbr
+            out_names = set()
 
     return team_out_qbs
 
@@ -55,7 +58,7 @@ def run_predictions():
         lambda r: is_starter_out(r["away_team"], r.get("away_qb_name", ""), out_map), axis=1
     )
 
-    artifact = joblib.load("models/nfl_win_prob_v1.joblib")
+    artifact = joblib.load("models/nfl_win_prob_v2.joblib")
     model = artifact["model"]
     feature_cols = artifact["features"]
 
