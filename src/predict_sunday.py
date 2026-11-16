@@ -58,7 +58,7 @@ def run_predictions():
         lambda r: is_starter_out(r["away_team"], r.get("away_qb_name", ""), out_map), axis=1
     )
 
-    artifact = joblib.load("models/nfl_win_prob_v2.joblib")
+    artifact = joblib.load("models/nfl_win_prob_v3.joblib")
     model = artifact["model"]
     feature_cols = artifact["features"]
 
