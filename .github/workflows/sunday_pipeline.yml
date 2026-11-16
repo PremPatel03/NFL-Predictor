@@ -1,0 +1,44 @@
+name: Sunday NFL Prediction Pipeline
+
+on:
+  schedule:
+    # 8:00 AM EST (13:00 UTC)
+    - cron: "0 13 * * 0"
+    # 11:40 AM EST (16:40 UTC)
+    - cron: "40 16 * * 0"
+  workflow_dispatch: # Allows manual one-click runs anytime
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Lets the bot commit updated CSVs back to main
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install nflreadpy pandas numpy scikit-learn joblib pyarrow requests
+
+      - name: Build pregame features
+        run: python src/build_features.py
+
+      - name: Run Sunday predictions
+        if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
+        run: python src/predict_sunday.py
+
+      - name: Commit updated predictions to GitHub
+        if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "nfl-predictor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/latest_predictions.csv data/pregame_features.parquet
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update Sunday NFL predictions"
+          git push
