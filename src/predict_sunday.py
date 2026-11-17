@@ -109,6 +109,7 @@ def run_sunday_predictions() -> pd.DataFrame:
     )
     slate["win_confidence"] = np.maximum(slate["home_win_prob"], slate["away_win_prob"])
 
+    pd.set_option("display.width", 1000)
     # Format clean output table sorted by highest model confidence
     output_cols = [
         "gameday",
@@ -118,17 +119,17 @@ def run_sunday_predictions() -> pd.DataFrame:
         "win_confidence",
         "home_win_prob",
         "away_win_prob",
-        "elo_diff",
-        "home_qb_out",
-        "away_qb_out",
     ]
     available_cols = [c for c in output_cols if c in slate.columns]
     results = slate[available_cols].sort_values("win_confidence", ascending=False).reset_index(drop=True)
 
+    if "elo_diff" in slate.columns:
+        slate["elo_diff"] = slate["elo_diff"].round(1)
+
     # Save to CSV so GitHub Actions automatically commits the updated picks to the repo
     results.to_csv("data/latest_predictions.csv", index=False)
 
-    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED v3) ===")
+    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED) ===")
     print(results.to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
     return results

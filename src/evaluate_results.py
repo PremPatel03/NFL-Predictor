@@ -95,7 +95,7 @@ def grade_games(season: int, week: int) -> None:
     ]
     print(merged[display_cols].to_string(index=False))
     print(
-        f"Week {week} Record: {merged['correct'].sum()}-{len(merged) - merged['correct'].sum()} "
+        f"\nWeek {week} Record: {merged['correct'].sum()}-{len(merged) - merged['correct'].sum()} "
         f"({merged['correct'].mean():.1%}) | Brier: {merged['brier'].mean():.4f}"
     )
     print(
@@ -209,7 +209,7 @@ def grade_players(season: int, week: int) -> None:
 def run_evaluation() -> None:
     current_season = nfl.get_current_season()
     current_week = nfl.get_current_week()
-    print(f"Evaluating completed results for Season {current_season}, Week {current_week}...")
+    print(f"\nEvaluating completed results for Season {current_season}, Week {current_week}...")
     grade_games(current_season, current_week)
     grade_players(current_season, current_week)
 

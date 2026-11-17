@@ -93,7 +93,7 @@ def _build_upcoming_slate_rows(
     merged = merged[~merged["player_display_name"].str.strip().str.lower().isin(inactive_names)].copy()
     return merged
 
-def run_player_predictions(player_query: str | None = None):
+def run_player_predictions(player_query: str | None = None, team_query: str | None = None):
     """
     Generates weekly yardage projections, 75th-percentile ceilings, and Anytime TD
     probabilities + fair odds across WR, TE, QB, and RB positions.
@@ -109,6 +109,16 @@ def run_player_predictions(player_query: str | None = None):
     schedules = nfl.load_schedules(seasons).to_pandas()
     slate = schedules[(schedules["season"] == current_season) & (schedules["week"] == current_week)].copy()
     inactive_names = get_inactive_players()
+
+    """ # Load official current-season rosters so only ACTIVE players on their CURRENT team appear
+    rosters = nfl.load_rosters([current_season]).to_pandas()
+    active_roster = rosters[rosters["status"] == "ACT"][["gsis_id", "team"]].drop_duplicates(subset=["gsis_id"])
+    active_roster = active_roster.rename(columns={"gsis_id": "player_id", "team": "current_team"}) """
+
+    def _filter_active_recent(df: pd.DataFrame) -> pd.DataFrame:
+        latest = df.sort_values(["player_id", "season", "week"]).groupby("player_id").tail(1).copy()
+        # Keep only players who actually logged stats in the current season within the last 3 weeks
+        return latest[(latest["season"] == current_season) & (latest["week"] >= current_week - 3)]
 
     # Latest defensive generosity snapshots
     yard_def_cols = [
@@ -138,7 +148,7 @@ def run_player_predictions(player_query: str | None = None):
     all_preds = []
 
     # 1. WR & TE Receiving Yards
-    wr_latest = datasets["WR_TE"].sort_values(["player_id", "season", "week"]).groupby("player_id").tail(1)
+    wr_latest = _filter_active_recent(datasets["WR_TE"])
     wr_latest = wr_latest[wr_latest["ewma5_targets"] >= 2.0].copy()
     wr_keep = [
         "player_id", "player_display_name", "position", "team", "is_wr",
@@ -154,7 +164,7 @@ def run_player_predictions(player_query: str | None = None):
     all_preds.append(wr_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
 
     # 2. QB Passing Yards
-    qb_latest = datasets["QB"].sort_values(["player_id", "season", "week"]).groupby("player_id").tail(1)
+    qb_latest = _filter_active_recent(datasets["QB"])
     qb_latest = qb_latest[qb_latest["ewma5_attempts"] >= 15.0].copy()
     qb_keep = [
         "player_id", "player_display_name", "position", "team",
@@ -170,7 +180,7 @@ def run_player_predictions(player_query: str | None = None):
     all_preds.append(qb_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
 
     # 3. RB Rushing Yards
-    rb_latest = datasets["RB"].sort_values(["player_id", "season", "week"]).groupby("player_id").tail(1)
+    rb_latest = _filter_active_recent(datasets["RB"])
     rb_latest = rb_latest[rb_latest["ewma5_carries"] >= 5.0].copy()
     rb_keep = [
         "player_id", "player_display_name", "position", "team",
@@ -186,7 +196,7 @@ def run_player_predictions(player_query: str | None = None):
     all_preds.append(rb_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
 
     # 4. Anytime Touchdown Probabilities (WR, TE, RB)
-    td_latest = td_df.sort_values(["player_id", "season", "week"]).groupby("player_id").tail(1)
+    td_latest = _filter_active_recent(td_df)
     td_latest = td_latest[td_latest["ewma5_total_touches"] >= 2.5].copy()
     td_keep = [
         "player_id", "player_display_name", "position", "team", "is_rb",
@@ -218,6 +228,12 @@ def run_player_predictions(player_query: str | None = None):
         matches = results[results["player_display_name"].str.contains(player_query, case=False, na=False)]
         print(f"\n=== PLAYER LOOKUP: '{player_query}' ===")
         print(matches.to_string(index=False) if not matches.empty else "No matching active player found on this week's slate.")
+    elif team_query:
+        team_code = team_query.strip().upper()
+        game_rows = results[(results["team"] == team_code) | (results["opponent"] == team_code)].copy()
+        game_rows = game_rows.sort_values(["team", "stat_type", "proj_yards"], ascending=[True, True, False])
+        print(f"\n=== FULL GAME OFFENSIVE PROJECTIONS ({team_code} MATCHUP) ===")
+        print(game_rows.to_string(index=False) if not game_rows.empty else f"No active matchup found for '{team_code}'.")
     else:
         print("\n=== TOP 10 PROJECTED RECEIVERS THIS WEEK ===")
         print(results[results["stat_type"] == "Rec Yards"].head(10).to_string(index=False))
@@ -231,5 +247,6 @@ def run_player_predictions(player_query: str | None = None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate weekly NFL player yardage & TD projections.")
     parser.add_argument("--player", type=str, default=None, help="Filter output to a specific player name")
+    parser.add_argument("--team", type=str, default=None, help="Show full offensive projections for a team's game (e.g., KC)")
     args = parser.parse_args()
-    run_player_predictions(args.player)
+    run_player_predictions(args.player, args.team)
