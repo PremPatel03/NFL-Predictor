@@ -45,3 +45,6 @@ python src/predict_sunday.py
 
 # 3. Look up a specific player's yardage ceiling & TD probability
 python src/predict_players.py --player "Justin Jefferson"
+
+# 4. See how the model did against this week's matchup
+python src/evaluate_results.py
