@@ -1,4 +1,4 @@
-# 🏈 NFL-Predictor
+# NFL-Predictor
 
 ** [Launch the Live Interactive Dashboard](https://nfl-predictor-prem.streamlit.app/)**
 
