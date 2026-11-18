@@ -2,7 +2,7 @@
 
 ** [Launch the Live Interactive Dashboard](https://nfl-predictor-prem.streamlit.app/)**
 
-An automated weekly NFL prediction engine that forecasts **game winners**, **player yardage & receptions**, and **anytime touchdown probabilities** every Sunday morning before kickoff—and grades its own accuracy every Tuesday after Monday Night Football.
+An automated weekly NFL prediction engine that forecasts **game winners**, **player yardage & receptions**, and **anytime touchdown probabilities** every Sunday morning before kickoff and grades its own accuracy every Tuesday after Monday Night Football.
 
 Instead of relying on static season averages or manual spreadsheets, the system automatically gathers fresh play-by-play data, checks real-time Sunday morning injury reports, and publishes updated predictions straight to this repository and the live web app.
 
@@ -27,7 +27,7 @@ Instead of relying on static season averages or manual spreadsheets, the system 
 
 ## Where to See the Latest Predictions
 
-* **Interactive Web App (Recommended):** **[nfl-predictor-prem.streamlit.app](https://nfl-predictor-prem.streamlit.app/)** — Browse weekly game picks, inspect full head-to-head offensive breakdowns, search any player, and view live season accuracy metrics.
+* **Interactive Web App :** **[nfl-predictor-prem.streamlit.app](https://nfl-predictor-prem.streamlit.app/)** — Browse weekly game picks, inspect full head-to-head offensive breakdowns, search any player, and view live season accuracy metrics.
 * **Raw Weekly CSVs in This Repo:**
   * **Weekly Game Winners:** [`data/latest_predictions.csv`](data/latest_predictions.csv)
   * **Weekly Player Yards, Receptions & TD Odds:** [`data/latest_player_predictions.csv`](data/latest_player_predictions.csv)
@@ -52,7 +52,7 @@ streamlit run dashboard.py
 PYTHONPATH=src python src/build_features.py && PYTHONPATH=src python src/predict_sunday.py
 
 # 4. Look up a specific player or an entire game matchup
-python src/predict_players.py --player "Zay Flowers"
+python src/predict_players.py --player "Justin Jefferson"
 python src/predict_players.py --team KC
 
 # 5. Grade completed games and player props against final box scores

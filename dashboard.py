@@ -14,7 +14,6 @@ import streamlit as st
 
 st.set_page_config(
     page_title="NFL-Predictor | Weekly Win & Player Prop",
-    page_icon="🏈",
     layout="wide",
 )
 
