@@ -1,0 +1,290 @@
+player_display_name,position,team,opponent,stat_type,proj_yards,ceiling_75,td_prob,fair_td_odds
+Joe Burrow,QB,CIN,WAS,Pass Yards,308.1,343.8,,
+Dak Prescott,QB,DAL,TEN,Pass Yards,299.2,334.9,,
+Caleb Williams,QB,CHI,NO,Pass Yards,270.2,305.9,,
+C.J. Stroud,QB,HOU,IND,Pass Yards,259.1,294.9,,
+Patrick Mahomes,QB,KC,ARI,Pass Yards,254.7,290.5,,
+Josh Allen,QB,BUF,MIA,Pass Yards,249.9,285.6,,
+Cam Ward,QB,TEN,DAL,Pass Yards,248.8,284.5,,
+Trevor Lawrence,QB,JAX,NYG,Pass Yards,247.4,283.1,,
+Jayden Daniels,QB,WAS,CIN,Pass Yards,245.6,281.4,,
+Jared Goff,QB,DET,TB,Pass Yards,242.7,278.4,,
+Brock Purdy,QB,SF,MIN,Pass Yards,241.2,276.9,,
+Bo Nix,QB,DEN,LV,Pass Yards,238.4,274.1,,
+Kirk Cousins,QB,MIN,SF,Pass Yards,235.1,270.9,,
+Bryce Young,QB,CAR,BAL,Pass Yards,231.0,266.8,,
+Jacoby Brissett,QB,BAL,CAR,Pass Yards,229.2,264.9,,
+Tyler Shough,QB,NO,CHI,Pass Yards,228.4,264.2,,
+Kyler Murray,QB,MIN,SF,Pass Yards,220.4,256.1,,
+Davis Mills,QB,HOU,IND,Pass Yards,218.1,253.8,,
+J.J. McCarthy,QB,NYG,JAX,Pass Yards,214.4,250.1,,
+Aaron Rodgers,QB,PIT,PHI,Pass Yards,213.6,249.4,,
+Geno Smith,QB,NYJ,LAC,Pass Yards,207.6,243.3,,
+Tanner McKee,QB,PHI,PIT,Pass Yards,204.5,240.2,,
+Justin Herbert,QB,LAC,NYJ,Pass Yards,203.4,239.1,,
+Carson Wentz,QB,MIN,SF,Pass Yards,203.2,239.0,,
+Tyler Huntley,QB,BAL,CAR,Pass Yards,197.8,233.6,,
+Daniel Jones,QB,IND,HOU,Pass Yards,191.5,227.2,,
+Baker Mayfield,QB,TB,DET,Pass Yards,187.8,223.6,,
+Malik Willis,QB,MIA,BUF,Pass Yards,187.7,223.4,,
+Cade Klubnik,QB,NYJ,LAC,Pass Yards,187.4,223.2,,
+Kyle McCord,QB,MIA,BUF,Pass Yards,186.7,222.4,,
+Joe Fagnano,QB,BAL,CAR,Pass Yards,180.5,216.2,,
+Fernando Mendoza,QB,LV,DEN,Pass Yards,175.5,211.2,,
+Joe Milton III,QB,PHI,PIT,Pass Yards,173.3,209.0,,
+Gardner Minshew,QB,ARI,KC,Pass Yards,169.2,204.9,,
+Carson Beck,QB,ARI,KC,Pass Yards,150.0,185.7,,
+Ja'Marr Chase,WR,CIN,WAS,Rec Yards,100.5,112.4,60.5,-153
+CeeDee Lamb,WR,DAL,TEN,Rec Yards,92.2,104.1,56.2,-128
+George Pickens,WR,DAL,TEN,Rec Yards,78.3,90.1,53.0,-113
+Justin Jefferson,WR,MIN,SF,Rec Yards,73.2,85.0,28.2,+255
+Amon-Ra St. Brown,WR,DET,TB,Rec Yards,72.0,83.8,39.8,+151
+Garrett Wilson,WR,NYJ,LAC,Rec Yards,69.6,81.5,28.1,+256
+Nico Collins,WR,HOU,IND,Rec Yards,67.9,79.7,40.1,+149
+Jordyn Tyson,WR,NO,CHI,Rec Yards,66.7,78.5,23.7,+322
+Malik Nabers,WR,NYG,JAX,Rec Yards,64.4,76.3,28.0,+257
+Tee Higgins,WR,CIN,WAS,Rec Yards,64.2,76.1,42.1,+137
+Parker Washington,WR,JAX,NYG,Rec Yards,64.2,76.1,38.2,+162
+Luther Burden III,WR,CHI,NO,Rec Yards,64.0,75.9,44.6,+124
+George Kittle,TE,SF,MIN,Rec Yards,61.2,73.0,30.4,+229
+Omar Cooper Jr.,WR,NYJ,LAC,Rec Yards,61.0,72.8,26.5,+277
+Tetairoa McMillan,WR,CAR,BAL,Rec Yards,60.0,71.8,27.8,+260
+Michael Wilson,WR,ARI,KC,Rec Yards,59.8,71.7,22.3,+348
+Isaiah Likely,TE,NYG,JAX,Rec Yards,59.5,71.3,31.5,+217
+Chris Olave,WR,NO,CHI,Rec Yards,57.9,69.8,22.7,+340
+Rashee Rice,WR,KC,ARI,Rec Yards,57.8,69.7,33.8,+196
+DK Metcalf,WR,PIT,PHI,Rec Yards,57.1,68.9,24.1,+315
+Keenan Allen,WR,SF,MIN,Rec Yards,56.9,68.7,25.5,+292
+DJ Moore,WR,BUF,MIA,Rec Yards,56.8,68.7,37.5,+167
+Colston Loveland,TE,CHI,NO,Rec Yards,56.6,68.5,35.1,+185
+Stefon Diggs,WR,WAS,CIN,Rec Yards,56.2,68.0,29.8,+235
+Rome Odunze,WR,CHI,NO,Rec Yards,55.8,67.7,34.8,+188
+Makai Lemon,WR,PHI,PIT,Rec Yards,55.0,66.9,20.8,+380
+Caleb Douglas,WR,MIA,BUF,Rec Yards,55.0,66.9,18.4,+445
+Zay Flowers,WR,BAL,CAR,Rec Yards,54.4,66.3,24.6,+307
+Adonai Mitchell,WR,NYJ,LAC,Rec Yards,53.8,65.7,21.4,+368
+Emeka Egbuka,WR,TB,DET,Rec Yards,53.5,65.4,22.0,+354
+Trey McBride,TE,ARI,KC,Rec Yards,52.0,63.9,18.1,+453
+Tre Harris,WR,LAC,NYJ,Rec Yards,52.0,63.9,21.0,+375
+Jameson Williams,WR,DET,TB,Rec Yards,50.8,62.7,29.1,+243
+Courtland Sutton,WR,DEN,LV,Rec Yards,50.7,62.5,26.1,+283
+Xavier Hutchinson,WR,HOU,IND,Rec Yards,49.7,61.6,32.4,+209
+Brock Bowers,TE,LV,DEN,Rec Yards,48.2,60.0,21.5,+365
+Ryan Flournoy,WR,DAL,TEN,Rec Yards,47.8,59.7,35.2,+184
+Jakobi Meyers,WR,JAX,NYG,Rec Yards,47.5,59.4,25.5,+292
+Josh Downs,WR,KC,ARI,Rec Yards,47.0,58.9,28.5,+251
+Elic Ayomanor,WR,TEN,DAL,Rec Yards,46.6,58.4,21.6,+364
+Khalil Shakir,WR,BUF,MIA,Rec Yards,44.2,56.1,32.3,+209
+Jaylen Waddle,WR,DEN,LV,Rec Yards,43.6,55.5,23.0,+335
+Chig Okonkwo,TE,WAS,CIN,Rec Yards,43.0,54.8,22.7,+340
+Travis Kelce,TE,KC,ARI,Rec Yards,42.5,54.3,28.7,+248
+T.J. Hockenson,TE,MIN,SF,Rec Yards,42.3,54.2,21.1,+375
+Tank Dell,WR,HOU,IND,Rec Yards,42.0,53.9,30.4,+229
+Xavier Worthy,WR,KC,ARI,Rec Yards,41.7,53.5,23.7,+321
+Keon Coleman,WR,BUF,MIA,Rec Yards,41.1,53.0,26.3,+280
+Dalton Kincaid,TE,BUF,MIA,Rec Yards,40.0,51.9,29.8,+235
+Dallas Goedert,TE,PHI,PIT,Rec Yards,39.1,50.9,18.0,+455
+Malachi Fields,WR,NYG,JAX,Rec Yards,39.1,51.0,19.4,+414
+Germie Bernard,WR,PIT,PHI,Rec Yards,39.1,50.9,19.3,+418
+Treylon Burks,WR,WAS,CIN,Rec Yards,38.8,50.7,21.1,+374
+Pat Bryant,WR,DEN,LV,Rec Yards,38.3,50.2,24.7,+305
+Chris Godwin Jr.,WR,TB,DET,Rec Yards,38.1,49.9,14.4,+596
+Antonio Williams,WR,WAS,CIN,Rec Yards,37.9,49.7,21.7,+361
+Darren Waller,TE,CAR,BAL,Rec Yards,37.7,49.6,22.3,+349
+Sam LaPorta,TE,DET,TB,Rec Yards,37.4,49.2,23.0,+335
+Jalen Coker,WR,CAR,BAL,Rec Yards,37.3,49.1,21.1,+373
+Mark Andrews,TE,BAL,CAR,Rec Yards,37.2,49.0,18.8,+431
+Tyler Warren,TE,IND,HOU,Rec Yards,37.1,49.0,15.8,+533
+Jordan Watkins,WR,SF,MIN,Rec Yards,36.8,48.6,22.5,+344
+Van Jefferson,WR,WAS,CIN,Rec Yards,36.4,48.3,20.9,+379
+Darius Cooper,WR,PHI,PIT,Rec Yards,36.3,48.1,15.4,+549
+Ladd McConkey,WR,LAC,NYJ,Rec Yards,36.2,48.1,20.2,+394
+Kalif Raymond,WR,CHI,NO,Rec Yards,35.6,47.5,25.9,+286
+Tre Tucker,WR,LV,DEN,Rec Yards,34.5,46.4,15.2,+559
+Malik Washington,WR,MIA,BUF,Rec Yards,34.5,46.4,14.5,+591
+Ja'Kobi Lane,WR,BAL,CAR,Rec Yards,34.3,46.2,17.4,+473
+Chase Brown,RB,CIN,WAS,Rec Yards,33.2,40.6,50.1,-101
+Dalton Schultz,TE,HOU,IND,Rec Yards,33.1,44.9,25.3,+295
+Marvin Harrison Jr.,WR,HOU,IND,Rec Yards,33.1,44.9,23.4,+328
+Demarcus Robinson,WR,SF,MIN,Rec Yards,33.0,44.8,19.4,+416
+Christian McCaffrey,RB,SF,MIN,Rec Yards,32.9,40.3,62.9,-170
+Deebo Samuel Sr.,WR,SF,MIN,Rec Yards,32.7,44.6,31.6,+216
+Brenton Strange,TE,JAX,NYG,Rec Yards,32.2,44.1,22.3,+348
+Devaughn Vele,WR,NO,CHI,Rec Yards,31.9,43.8,15.5,+544
+Gunnar Helm,TE,TEN,DAL,Rec Yards,31.8,43.7,18.1,+453
+Kayshon Boutte,WR,HOU,IND,Rec Yards,31.7,43.6,25.6,+291
+Cade Otton,TE,TB,DET,Rec Yards,31.3,43.1,14.6,+585
+Quentin Johnston,WR,LAC,NYJ,Rec Yards,31.3,43.1,18.8,+432
+Rashod Bateman,WR,BAL,CAR,Rec Yards,30.8,42.7,15.7,+538
+Tommy Tremble,TE,CAR,BAL,Rec Yards,30.4,42.3,20.8,+381
+Darnell Mooney,WR,NYG,JAX,Rec Yards,29.9,41.8,16.0,+524
+Dohnte Meyers,WR,CIN,WAS,Rec Yards,29.9,41.8,25.1,+298
+Isaac TeSlaa,WR,DET,TB,Rec Yards,29.8,41.7,20.8,+380
+Jahmyr Gibbs,RB,DET,TB,Rec Yards,29.3,36.7,78.0,-354
+Brian Thomas Jr.,WR,JAX,NYG,Rec Yards,29.0,40.9,19.7,+408
+Tez Johnson,WR,TB,DET,Rec Yards,28.9,40.7,15.2,+556
+Evan Engram,TE,DEN,LV,Rec Yards,28.7,40.5,19.1,+424
+Pat Freiermuth,TE,PIT,PHI,Rec Yards,28.6,40.5,20.0,+400
+Tony Pollard,RB,TEN,DAL,Rec Yards,28.6,36.0,54.0,-117
+Jack Bech,WR,LV,DEN,Rec Yards,28.4,40.3,12.0,+732
+Darnell Washington,TE,PIT,PHI,Rec Yards,28.1,40.0,18.1,+452
+Chuba Hubbard,RB,CAR,BAL,Rec Yards,28.1,35.5,63.9,-177
+Mason Taylor,TE,NYJ,LAC,Rec Yards,27.9,39.8,15.5,+546
+Dawson Knox,TE,BUF,MIA,Rec Yards,27.8,39.7,23.0,+336
+Brevyn Spann-Ford,TE,DAL,TEN,Rec Yards,27.7,39.6,23.8,+320
+Ashton Jeanty,RB,LV,DEN,Rec Yards,27.6,35.0,21.6,+363
+Charlie Kolar,TE,LAC,NYJ,Rec Yards,27.5,39.4,16.8,+497
+Cyrus Allen,WR,KC,ARI,Rec Yards,27.5,39.3,22.3,+349
+KeAndre Lambert-Smith,WR,LAC,NYJ,Rec Yards,27.3,39.2,17.1,+486
+Jalen Nailor,WR,LV,DEN,Rec Yards,27.0,38.9,11.9,+738
+Josh Palmer,WR,BUF,MIA,Rec Yards,26.9,38.8,,
+Michael Mayer,TE,LV,DEN,Rec Yards,26.8,38.7,13.7,+628
+Troy Franklin,WR,DEN,LV,Rec Yards,26.7,38.5,17.6,+467
+Kendrick Bourne,WR,ARI,KC,Rec Yards,26.4,38.3,12.0,+736
+Greg Dulcich,TE,MIA,BUF,Rec Yards,25.5,37.4,12.0,+732
+Gavin Bartholomew,TE,MIN,SF,Rec Yards,25.5,37.3,17.1,+486
+Chimere Dike,WR,TEN,DAL,Rec Yards,25.5,37.3,17.1,+485
+Emmett Johnson,RB,KC,ARI,Rec Yards,25.5,32.9,46.6,+115
+Mike Gesicki,TE,CIN,WAS,Rec Yards,25.3,37.1,24.0,+317
+Jake Ferguson,TE,DAL,TEN,Rec Yards,25.2,37.1,24.3,+311
+Mitchell Tinsley,WR,CIN,WAS,Rec Yards,24.9,36.7,20.9,+379
+Tai Felton,WR,MIN,SF,Rec Yards,24.4,36.3,14.3,+599
+Marvin Mims Jr.,WR,DEN,LV,Rec Yards,24.1,35.9,19.0,+427
+Kenneth Walker III,RB,KC,ARI,Rec Yards,24.1,31.5,67.9,-212
+Myles Price,WR,MIN,SF,Rec Yards,23.9,35.7,16.3,+515
+Jaylen Warren,RB,PIT,PHI,Rec Yards,23.7,31.1,41.2,+143
+Brandin Cooks,WR,SF,MIN,Rec Yards,23.6,35.5,,
+Theo Wease Jr.,WR,LAC,NYJ,Rec Yards,23.4,35.3,,
+Reggie Virgil,WR,ARI,KC,Rec Yards,23.4,35.3,10.4,+866
+Juwan Johnson,TE,NO,CHI,Rec Yards,23.3,35.2,14.8,+576
+Oronde Gadsden II,TE,LAC,NYJ,Rec Yards,23.2,35.0,16.1,+521
+Jonathan Taylor,RB,IND,HOU,Rec Yards,22.9,30.3,33.9,+195
+Breece Hall,RB,NYJ,LAC,Rec Yards,22.9,30.3,34.8,+187
+Calvin Ridley,WR,TEN,DAL,Rec Yards,22.8,34.7,14.7,+580
+John Metchie III,WR,CAR,BAL,Rec Yards,22.8,34.6,,
+Jonah Coleman,RB,DEN,LV,Rec Yards,22.6,30.0,42.2,+137
+Laquon Treadwell,WR,IND,HOU,Rec Yards,22.4,34.3,12.2,+720
+Jauan Jennings,WR,MIN,SF,Rec Yards,22.2,34.1,,
+Kevin Coleman Jr.,WR,MIA,BUF,Rec Yards,22.1,34.0,11.6,+764
+Noah Gray,TE,KC,ARI,Rec Yards,22.0,33.8,,
+Chris Bell,WR,MIA,BUF,Rec Yards,21.9,33.8,10.9,+821
+Nate Boerkircher,TE,JAX,NYG,Rec Yards,21.7,33.6,,
+Drew Sample,TE,CIN,WAS,Rec Yards,21.6,33.5,,
+Xavier Restrepo,WR,TEN,DAL,Rec Yards,21.5,33.3,,
+Marquise Brown,WR,PHI,PIT,Rec Yards,21.1,33.0,,
+Isaiah Williams,WR,NYJ,LAC,Rec Yards,21.0,32.8,14.1,+609
+Travis Etienne,RB,NO,CHI,Rec Yards,20.8,28.2,23.9,+318
+Adam Trautman,TE,DEN,LV,Rec Yards,20.0,31.9,,
+Brandon Smith,WR,PIT,PHI,Rec Yards,19.9,31.8,,
+Ben Sinnott,TE,WAS,CIN,Rec Yards,19.5,31.3,,
+Daniel Bellinger,TE,TEN,DAL,Rec Yards,19.2,31.0,15.7,+536
+Austin Ekeler,RB,WAS,CIN,Rec Yards,19.1,26.5,21.3,+370
+Theo Johnson,TE,NYG,JAX,Rec Yards,19.0,30.9,14.9,+573
+Rachaad White,RB,WAS,CIN,Rec Yards,19.0,26.4,27.3,+266
+Kenyon Sadiq,TE,NYJ,LAC,Rec Yards,18.6,30.5,13.6,+636
+Javonte Williams,RB,DAL,TEN,Rec Yards,18.4,25.8,58.0,-138
+Bhayshul Tuten,RB,JAX,NYG,Rec Yards,18.3,25.7,55.5,-125
+D'Andre Swift,RB,CHI,NO,Rec Yards,18.0,25.4,55.7,-126
+Cam Skattebo,RB,NYG,JAX,Rec Yards,17.9,25.3,46.4,+116
+Kenny Gainwell,RB,TB,DET,Rec Yards,17.4,24.8,24.6,+306
+Bucky Irving,RB,TB,DET,Rec Yards,17.1,24.5,57.7,-136
+Kimani Vidal,RB,LAC,NYJ,Rec Yards,16.5,23.9,17.7,+466
+Zay Jones,WR,ARI,KC,Rec Yards,16.4,28.3,,
+Josh Cuevas,TE,BAL,CAR,Rec Yards,16.4,28.3,,
+Samaje Perine,RB,CIN,WAS,Rec Yards,16.0,23.4,28.4,+252
+Ollie Gordon II,RB,MIA,BUF,Rec Yards,16.0,23.4,32.9,+204
+Rico Dowdle,RB,PIT,PHI,Rec Yards,15.9,23.3,24.1,+315
+Woody Marks,RB,HOU,IND,Rec Yards,15.6,23.0,41.8,+139
+Cody White,WR,LV,DEN,Rec Yards,15.5,27.3,,
+Elijah Moore,WR,PHI,PIT,Rec Yards,15.2,27.1,,
+Derrick Henry,RB,BAL,CAR,Rec Yards,15.0,22.4,34.1,+193
+Braelon Allen,RB,NYJ,LAC,Rec Yards,14.9,22.3,28.9,+245
+James Cook,RB,BUF,MIA,Rec Yards,14.3,21.7,72.0,-257
+Aaron Jones,RB,MIN,SF,Rec Yards,14.0,21.4,25.4,+293
+Omarion Hampton,RB,LAC,NYJ,Rec Yards,14.0,21.4,36.0,+178
+Tyler Allgeier,RB,ARI,KC,Rec Yards,13.9,21.3,18.0,+455
+Bam Knight,RB,ARI,KC,Rec Yards,12.9,20.3,11.6,+762
+Elijah Higgins,TE,ARI,KC,Rec Yards,12.6,24.4,9.9,+908
+Devin Singletary,RB,NYG,JAX,Rec Yards,12.6,20.0,17.8,+461
+Chase Brown,RB,CIN,WAS,Receptions,4.2,5.2,50.1,-101
+Christian McCaffrey,RB,SF,MIN,Receptions,3.8,4.7,62.9,-170
+Chuba Hubbard,RB,CAR,BAL,Receptions,3.7,4.6,63.9,-177
+Jahmyr Gibbs,RB,DET,TB,Receptions,3.7,4.6,78.0,-354
+Ashton Jeanty,RB,LV,DEN,Receptions,3.7,4.6,21.6,+363
+Tony Pollard,RB,TEN,DAL,Receptions,3.6,4.5,54.0,-117
+Kenneth Walker III,RB,KC,ARI,Receptions,3.2,4.2,67.9,-212
+Jaylen Warren,RB,PIT,PHI,Receptions,3.1,4.0,41.2,+143
+Emmett Johnson,RB,KC,ARI,Receptions,3.1,4.1,46.6,+115
+Jonathan Taylor,RB,IND,HOU,Receptions,3.0,4.0,33.9,+195
+Breece Hall,RB,NYJ,LAC,Receptions,3.0,3.9,34.8,+187
+Jonah Coleman,RB,DEN,LV,Receptions,3.0,3.9,42.2,+137
+Travis Etienne,RB,NO,CHI,Receptions,2.8,3.8,23.9,+318
+Austin Ekeler,RB,WAS,CIN,Receptions,2.6,3.5,21.3,+370
+Rachaad White,RB,WAS,CIN,Receptions,2.5,3.4,27.3,+266
+Cam Skattebo,RB,NYG,JAX,Receptions,2.5,3.4,46.4,+116
+D'Andre Swift,RB,CHI,NO,Receptions,2.4,3.3,55.7,-126
+Javonte Williams,RB,DAL,TEN,Receptions,2.4,3.3,58.0,-138
+Bucky Irving,RB,TB,DET,Receptions,2.4,3.3,57.7,-136
+Kimani Vidal,RB,LAC,NYJ,Receptions,2.3,3.2,17.7,+466
+Bhayshul Tuten,RB,JAX,NYG,Receptions,2.3,3.2,55.5,-125
+Derrick Henry,RB,BAL,CAR,Receptions,2.2,3.1,34.1,+193
+Rico Dowdle,RB,PIT,PHI,Receptions,2.2,3.1,24.1,+315
+Kenny Gainwell,RB,TB,DET,Receptions,2.2,3.1,24.6,+306
+Ollie Gordon II,RB,MIA,BUF,Receptions,2.2,3.2,32.9,+204
+Tyler Allgeier,RB,ARI,KC,Receptions,2.1,3.0,18.0,+455
+Braelon Allen,RB,NYJ,LAC,Receptions,2.1,3.0,28.9,+245
+Woody Marks,RB,HOU,IND,Receptions,2.1,3.0,41.8,+139
+Samaje Perine,RB,CIN,WAS,Receptions,2.0,2.9,28.4,+252
+Omarion Hampton,RB,LAC,NYJ,Receptions,2.0,3.0,36.0,+178
+Aaron Jones,RB,MIN,SF,Receptions,1.9,2.9,25.4,+293
+Devin Singletary,RB,NYG,JAX,Receptions,1.9,2.8,17.8,+461
+Bam Knight,RB,ARI,KC,Receptions,1.9,2.8,11.6,+762
+James Cook,RB,BUF,MIA,Receptions,1.8,2.7,72.0,-257
+James Cook,RB,BUF,MIA,Rush Yards,101.2,117.0,72.0,-257
+Jahmyr Gibbs,RB,DET,TB,Rush Yards,96.6,112.3,78.0,-354
+Kenneth Walker III,RB,KC,ARI,Rush Yards,87.9,103.7,67.9,-212
+Bucky Irving,RB,TB,DET,Rush Yards,83.5,99.3,57.7,-136
+Chuba Hubbard,RB,CAR,BAL,Rush Yards,79.6,95.3,63.9,-177
+Javonte Williams,RB,DAL,TEN,Rush Yards,72.9,88.7,58.0,-138
+Tony Pollard,RB,TEN,DAL,Rush Yards,70.3,86.1,54.0,-117
+Omarion Hampton,RB,LAC,NYJ,Rush Yards,67.3,83.1,36.0,+178
+Bhayshul Tuten,RB,JAX,NYG,Rush Yards,66.8,82.6,55.5,-125
+Cam Skattebo,RB,NYG,JAX,Rush Yards,66.4,82.2,46.4,+116
+Jaylen Warren,RB,PIT,PHI,Rush Yards,66.3,82.0,41.2,+143
+D'Andre Swift,RB,CHI,NO,Rush Yards,64.5,80.3,55.7,-126
+Ollie Gordon II,RB,MIA,BUF,Rush Yards,61.4,77.2,32.9,+204
+Woody Marks,RB,HOU,IND,Rush Yards,61.2,77.0,41.8,+139
+Christian McCaffrey,RB,SF,MIN,Rush Yards,60.1,75.8,62.9,-170
+Jonathan Taylor,RB,IND,HOU,Rush Yards,59.6,75.4,33.9,+195
+Jonah Coleman,RB,DEN,LV,Rush Yards,59.3,75.1,42.2,+137
+Braelon Allen,RB,NYJ,LAC,Rush Yards,53.8,69.6,28.9,+245
+Emmett Johnson,RB,KC,ARI,Rush Yards,52.8,68.5,46.6,+115
+Breece Hall,RB,NYJ,LAC,Rush Yards,52.1,67.8,34.8,+187
+Derrick Henry,RB,BAL,CAR,Rush Yards,49.7,65.4,34.1,+193
+Chase Brown,RB,CIN,WAS,Rush Yards,49.3,65.1,50.1,-101
+Kaelon Black,RB,SF,MIN,Rush Yards,46.8,62.5,28.4,+252
+J.K. Dobbins,RB,DEN,LV,Rush Yards,42.9,58.7,23.2,+331
+Rico Dowdle,RB,PIT,PHI,Rush Yards,42.3,58.0,24.1,+315
+Jordan Mason,RB,MIN,SF,Rush Yards,41.7,57.4,24.0,+317
+Kenny Gainwell,RB,TB,DET,Rush Yards,40.4,56.2,24.6,+306
+Rachaad White,RB,WAS,CIN,Rush Yards,38.9,54.7,27.3,+266
+Jeremiyah Love,RB,ARI,KC,Rush Yards,38.4,54.2,16.8,+494
+Seth McGowan,RB,IND,HOU,Rush Yards,38.1,53.9,17.0,+487
+Aaron Jones,RB,MIN,SF,Rush Yards,37.9,53.7,25.4,+293
+Tyler Allgeier,RB,ARI,KC,Rush Yards,37.9,53.7,18.0,+455
+Travis Etienne,RB,NO,CHI,Rush Yards,37.7,53.5,23.9,+318
+Tyler Goodson,RB,DAL,TEN,Rush Yards,37.0,52.7,28.8,+247
+Saquon Barkley,RB,PHI,PIT,Rush Yards,36.8,52.6,23.2,+331
+Audric Estime,RB,NO,CHI,Rush Yards,36.7,52.5,22.0,+355
+Kimani Vidal,RB,LAC,NYJ,Rush Yards,32.9,48.7,17.7,+466
+Mike Washington Jr.,RB,LV,DEN,Rush Yards,32.7,48.5,14.6,+585
+Ashton Jeanty,RB,LV,DEN,Rush Yards,31.5,47.3,21.6,+363
+Samaje Perine,RB,CIN,WAS,Rush Yards,30.2,46.0,28.4,+252
+Austin Ekeler,RB,WAS,CIN,Rush Yards,29.0,44.8,21.3,+370
+Salvon Ahmed,RB,CHI,NO,Rush Yards,28.1,43.8,20.7,+382
+Emari Demercado,RB,HOU,IND,Rush Yards,28.1,43.8,20.5,+388
+Chris Rodriguez Jr.,RB,JAX,NYG,Rush Yards,27.8,43.5,21.9,+356
+DJ Giddens,RB,IND,HOU,Rush Yards,25.5,41.3,11.5,+767
+Devin Singletary,RB,NYG,JAX,Rush Yards,25.2,41.0,17.8,+461
+Sione Vaki,RB,DET,TB,Rush Yards,23.5,39.3,19.0,+426
+Bam Knight,RB,ARI,KC,Rush Yards,22.9,38.6,11.6,+762

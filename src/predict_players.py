@@ -17,6 +17,8 @@ import os
 from player_features import (
     QB_FEATURES,
     RB_FEATURES,
+    RB_REC_FEATURES,
+    RB_RECEPTIONS_FEATURES,
     TD_FEATURES,
     WR_TE_FEATURES,
     build_all_player_datasets,
@@ -187,6 +189,7 @@ def run_player_predictions(player_query: str | None = None, team_query: str | No
         "player_id", "player_display_name", "position", "team",
         "ewma5_rush_yards", "ewma5_carries", "ewma5_rush_epa",
         "ewma5_yards_per_carry", "ewma5_targets",
+        "ewma5_rec_yards", "ewma5_receptions", "ewma5_target_share", "ewma5_rec_epa",
     ]
     rb_slate = _build_upcoming_slate_rows(rb_latest[rb_keep], latest_yard_def, slate, inactive_names, yard_def_cols).dropna(subset=RB_FEATURES)
 
@@ -195,6 +198,26 @@ def run_player_predictions(player_query: str | None = None, team_query: str | No
     rb_slate["ceiling_75"] = rb_slate["proj_yards"] + rb_art["upside_75_boost"]
     rb_slate["stat_type"] = "Rush Yards"
     all_preds.append(rb_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
+
+    # 3b. RB Receiving Yards & Receptions (Pass-Catching Backs >= 1.5 targets/game)
+    rb_pass_latest = rb_latest[rb_latest["ewma5_targets"] >= 1.5].copy()
+    if not rb_pass_latest.empty:
+        rb_rec_slate = _build_upcoming_slate_rows(
+            rb_pass_latest[rb_keep], latest_yard_def, slate, inactive_names, yard_def_cols
+        ).dropna(subset=RB_REC_FEATURES)
+
+        rb_rec_art = joblib.load("models/rb_rec_yards_v1.joblib")
+        rb_rec_slate["proj_yards"] = np.clip(rb_rec_art["model"].predict(rb_rec_slate[RB_REC_FEATURES]), 0, None)
+        rb_rec_slate["ceiling_75"] = rb_rec_slate["proj_yards"] + rb_rec_art["upside_75_boost"]
+        rb_rec_slate["stat_type"] = "Rec Yards"
+        all_preds.append(rb_rec_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
+
+        rb_catches_art = joblib.load("models/rb_receptions_v1.joblib")
+        rb_catches_slate = rb_rec_slate.dropna(subset=RB_RECEPTIONS_FEATURES).copy()
+        rb_catches_slate["proj_yards"] = np.clip(rb_catches_art["model"].predict(rb_catches_slate[RB_RECEPTIONS_FEATURES]), 0, None)
+        rb_catches_slate["ceiling_75"] = rb_catches_slate["proj_yards"] + rb_catches_art["upside_75_boost"]
+        rb_catches_slate["stat_type"] = "Receptions"
+        all_preds.append(rb_catches_slate[["player_id", "player_display_name", "position", "team", "opponent", "stat_type", "proj_yards", "ceiling_75"]])
 
     # 4. Anytime Touchdown Probabilities (WR, TE, RB)
     td_latest = _filter_active_recent(td_df)

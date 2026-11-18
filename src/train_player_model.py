@@ -22,6 +22,8 @@ from sklearn.preprocessing import StandardScaler
 from player_features import (
     QB_FEATURES,
     RB_FEATURES,
+    RB_RECEPTIONS_FEATURES,
+    RB_REC_FEATURES,
     WR_TE_FEATURES,
     build_all_player_datasets,
 )
@@ -115,13 +117,22 @@ def train_all_player_models() -> None:
     _fit_and_save(qbs, QB_FEATURES, "pass_yards", "models/qb_pass_yards_v1.joblib", "QB Passing Yards")
 
     # RB Rushing Yards: filter to active backfield contributors (>= 4 rolling carries/game, >= 1 carry in game)
-    rbs = datasets["RB"]
-    rbs = rbs[
-        (rbs["week"] >= 2)
-        & (rbs["ewma5_carries"] >= 4.0)
-        & (rbs["carries"] > 0)
-    ].dropna(subset=RB_FEATURES + ["rush_yards"])
-    _fit_and_save(rbs, RB_FEATURES, "rush_yards", "models/rb_rush_yards_v1.joblib", "RB Rushing Yards")
+    rbs_rec = datasets["RB"]
+    rbs_rec = rbs_rec[
+        (rbs_rec["week"] >= 2)
+        & (rbs_rec["ewma5_targets"] >= 1.5)
+        & (rbs_rec["targets"] > 0)
+    ].dropna(subset=RB_REC_FEATURES + ["rec_yards"])
+    _fit_and_save(rbs_rec, RB_REC_FEATURES, "rec_yards", "models/rb_rec_yards_v1.joblib", "RB Receiving Yards")
+
+    # RB Receptions: filter to pass-catching backs (>= 1.5 rolling targets/game)
+    rbs_catches = datasets["RB"]
+    rbs_catches = rbs_catches[
+        (rbs_catches["week"] >= 2)
+        & (rbs_catches["ewma5_targets"] >= 1.5)
+        & (rbs_catches["targets"] > 0)
+    ].dropna(subset=RB_RECEPTIONS_FEATURES + ["receptions"])
+    _fit_and_save(rbs_catches, RB_RECEPTIONS_FEATURES, "receptions", "models/rb_receptions_v1.joblib", "RB Receptions")
 
 if __name__ == "__main__":
     train_all_player_models()

@@ -45,11 +45,34 @@ RB_FEATURES = [
     "ewma5_carries",                  # 5-game rolling rushing attempts per game
     "ewma5_rush_epa",                 # 5-game rolling rushing EPA
     "ewma5_yards_per_carry",          # 5-game rolling rushing efficiency (YPC)
-    "ewma5_targets",                  # 5-game rolling receiving targets (proxy for 3-down snap share)
+    "ewma5_targets",                  # 5-game rolling receiving targets
     "opp_ewma8_rush_yards_allowed",   # Opponent defense's 8-game rolling RB rushing yards allowed
     "opp_ewma8_def_run_epa",          # Opponent defense's 8-game rolling run EPA allowed
     "implied_team_total",             # Vegas-implied team points
     "team_spread",                    # Point spread (favored teams run more late in games)
+    "is_home",                        # 1 if home stadium, 0 if road/neutral
+]
+
+RB_REC_FEATURES = [
+    "ewma5_rec_yards",                # 5-game rolling RB receiving yards
+    "ewma5_receptions",               # 5-game rolling RB catches per game
+    "ewma5_targets",                  # 5-game rolling RB targets per game
+    "ewma5_target_share",             # 5-game rolling % of team pass attempts aimed at RB
+    "ewma5_rec_epa",                  # 5-game rolling RB receiving EPA
+    "opp_ewma8_def_pass_epa",         # Opponent defense's 8-game rolling pass EPA allowed
+    "implied_team_total",             # Vegas-implied team points
+    "team_spread",                    # Negative spread = underdog likely to throw to RBs more
+    "is_home",                        # 1 if home stadium, 0 if road/neutral
+]
+
+RB_RECEPTIONS_FEATURES = [
+    "ewma5_receptions",               # 5-game rolling RB catches per game
+    "ewma5_targets",                  # 5-game rolling RB targets per game
+    "ewma5_target_share",             # 5-game rolling % of team pass attempts aimed at RB
+    "ewma5_rec_epa",                  # 5-game rolling RB receiving EPA
+    "opp_ewma8_def_pass_epa",         # Opponent defense's 8-game rolling pass EPA allowed
+    "implied_team_total",             # Vegas-implied team points
+    "team_spread",                    # Point spread (trailing teams dump off more to RBs)
     "is_home",                        # 1 if home stadium, 0 if road/neutral
 ]
 
@@ -238,16 +261,25 @@ def build_all_player_datasets(seasons: list[int], shift_for_training: bool) -> d
     # RB Rushing Dataset
 
     rbs = reg_stats[reg_stats["position"] == "RB"].copy()
-    for c in ["rushing_yards", "carries", "rushing_epa", "targets"]:
+    for c in ["rushing_yards", "carries", "rushing_epa", "targets", "receptions", "receiving_yards", "target_share", "receiving_epa"]:
         rbs[c] = rbs[c].fillna(0.0)
     rbs["yards_per_carry"] = np.where(rbs["carries"] > 0, rbs["rushing_yards"] / rbs["carries"], 0.0)
-    rbs = rbs.rename(columns={"rushing_yards": "rush_yards", "rushing_epa": "rush_epa"})
+    rbs = rbs.rename(
+        columns={
+            "rushing_yards": "rush_yards",
+            "rushing_epa": "rush_epa",
+            "receiving_yards": "rec_yards",
+            "receiving_epa": "rec_epa",
+        }
+    )
+
+# RB Rushing & Receiving Dataset
     rbs = rbs.sort_values(["player_id", "season", "week"]).reset_index(drop=True)
 
     rbs = _add_rolling_ewma(
         rbs,
         "player_id",
-        ["rush_yards", "carries", "rush_epa", "yards_per_carry", "targets"],
+        ["rush_yards", "carries", "rush_epa", "yards_per_carry", "targets", "receptions", "rec_yards", "target_share", "rec_epa"],
         span=5,
         shift=shift_for_training,
         prefix="ewma5_",

@@ -82,7 +82,7 @@ def run_sunday_predictions() -> pd.DataFrame:
     computes calibrated win probabilities with `nfl_win_prob_v3.joblib`,
     prints the weekly matchup table, and writes `data/latest_predictions.csv`.
     """
-    # 1. Load the trained v3 model artifact and its exact ordered feature list
+    # Load the trained v3 model artifact and its exact ordered feature list
     artifact = joblib.load("models/nfl_win_prob_v3.joblib")
     model = artifact["model"]
     feature_cols = artifact["features"]
@@ -99,7 +99,7 @@ def run_sunday_predictions() -> pd.DataFrame:
     slate["home_qb_out"] = slate["home_team"].map(qb_outs).fillna(0).astype(int)
     slate["away_qb_out"] = slate["away_team"].map(qb_outs).fillna(0).astype(int)
 
-    # 4. Predict calibrated home win probabilities (class 1 = home_win)
+    # Predict calibrated home win probabilities (class 1 = home_win)
     X_live = slate[feature_cols].fillna(0.0)
     home_probs = model.predict_proba(X_live)[:, 1]
 
@@ -111,9 +111,16 @@ def run_sunday_predictions() -> pd.DataFrame:
     slate["win_confidence"] = np.maximum(slate["home_win_prob"], slate["away_win_prob"])
 
     pd.set_option("display.width", 1000)
+
     # Format clean output table sorted by highest model confidence
+    parsed_slots = slate.apply(_format_kickoff_slot, axis=1)
+    slate["gametime"] = [p[0] for p in parsed_slots]
+    slate["time_slot"] = [p[1] for p in parsed_slots]
+
     output_cols = [
         "gameday",
+        "gametime",
+        "time_slot",
         "away_team",
         "home_team",
         "predicted_winner",
@@ -138,6 +145,40 @@ def run_sunday_predictions() -> pd.DataFrame:
     print(results.to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
     return results
+
+def _format_kickoff_slot(row: pd.Series) -> tuple[str, str]:
+    """Converts nflverse gameday (YYYY-MM-DD) & gametime (HH:MM ET) into 12h ET time and slate slot."""
+    gday = pd.to_datetime(row.get("gameday"), errors="coerce") # type: ignore
+    gtime = str(row.get("gametime") or "").strip()
+
+    if pd.isna(gday) or ":" not in gtime:
+        return (gtime or "TBD", "Other")
+
+    hour, minute = map(int, gtime.split(":")[:2])
+    ampm = "AM" if hour < 12 else "PM"
+    hour_12 = hour if 1 <= hour <= 12 else (hour - 12 if hour > 12 else 12)
+    formatted_time = f"{hour_12}:{minute:02d} {ampm} ET"
+
+    dow = gday.day_name()
+    if dow == "Thursday":
+        slot = "Thu Night"
+    elif dow == "Monday":
+        slot = "Mon Night"
+    elif dow == "Saturday":
+        slot = "Sat Slate"
+    elif dow == "Sunday":
+        if hour < 12:
+            slot = "Sun International"
+        elif hour < 15:
+            slot = "Sun 1:00 PM"
+        elif hour < 19:
+            slot = "Sun 4:00 PM"
+        else:
+            slot = "Sun Night"
+    else:
+        slot = dow
+
+    return (formatted_time, slot)
 
 if __name__ == "__main__":
     run_sunday_predictions()
