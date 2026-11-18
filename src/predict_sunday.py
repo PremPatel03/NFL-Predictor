@@ -15,6 +15,7 @@ import nflreadpy as nfl
 import numpy as np
 import pandas as pd
 import requests
+import os
 
 # ESPN public scoreboard & game summary endpoints for live Sunday morning injury reports
 SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
@@ -127,7 +128,11 @@ def run_sunday_predictions() -> pd.DataFrame:
         slate["elo_diff"] = slate["elo_diff"].round(1)
 
     # Save to CSV so GitHub Actions automatically commits the updated picks to the repo
+    os.makedirs("data/history", exist_ok=True)
+    season_val = int(slate["season"].iloc[0])
+    week_val = int(slate["week"].iloc[0])
     results.to_csv("data/latest_predictions.csv", index=False)
+    results.to_csv(f"data/history/game_preds_{season_val}_w{week_val}.csv", index=False)
 
     print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED) ===")
     print(results.to_string(index=False))

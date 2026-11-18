@@ -12,6 +12,7 @@ import nflreadpy as nfl
 import numpy as np
 import pandas as pd
 import requests
+import os
 
 from player_features import (
     QB_FEATURES,
@@ -222,7 +223,9 @@ def run_player_predictions(player_query: str | None = None, team_query: str | No
     results["ceiling_75"] = results["ceiling_75"].round(1)
     results = results.sort_values(["stat_type", "proj_yards"], ascending=[True, False])
 
+    os.makedirs("data/history", exist_ok=True)
     results.to_csv("data/latest_player_predictions.csv", index=False)
+    results.to_csv(f"data/history/player_preds_{current_season}_w{current_week}.csv", index=False)
 
     if player_query:
         matches = results[results["player_display_name"].str.contains(player_query, case=False, na=False)]

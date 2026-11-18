@@ -1,0 +1,40 @@
+name: Tuesday Post-Game Grading Pipeline
+
+on:
+  schedule:
+    # Runs every Tuesday at 14:00 UTC (9:00 AM EST), after Monday Night Football box scores finalize
+    - cron: "0 14 * * 2"
+  workflow_dispatch: # Allows manual testing anytime from the GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nflreadpy pandas numpy pyarrow
+
+      - name: Grade completed games and player props
+        run: |
+          PYTHONPATH=src python src/evaluate_results.py
+
+      - name: Commit updated season trackers to repository
+        run: |
+          git config user.name "nfl-predictor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "Grade completed NFL week and update season trackers"
+          git push
