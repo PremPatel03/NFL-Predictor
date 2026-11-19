@@ -28,7 +28,7 @@ Instead of relying on static season averages or manual spreadsheets, the system 
 ## Where to See the Latest Predictions
 
 <!-- LIVE_PICKS_START -->
-*Last automatically updated: **2026-11-19 18:05 UTC***
+*Last automatically updated: **2026-11-19 18:11 UTC***
 
 ### Current Slate: Game Picks & Vegas +EV Edges
 
@@ -52,15 +52,15 @@ Instead of relying on static season averages or manual spreadsheets, the system 
 
 | Player | Pos | Matchup | Anytime TD % | Fair Odds |
 | --- | --- | --- | --- | --- |
-| Jahmyr Gibbs | RB | DET vs. TB | 78.0% | -354.0 |
-| James Cook | RB | BUF vs. MIA | 72.0% | -257.0 |
+| Jahmyr Gibbs | RB | DET vs. TB | 78.3% | -361.0 |
+| James Cook | RB | BUF vs. MIA | 71.5% | -251.0 |
 | Kenneth Walker III | RB | KC vs. ARI | 67.9% | -212.0 |
 | Chuba Hubbard | RB | CAR vs. BAL | 63.9% | -177.0 |
-| Christian McCaffrey | RB | SF vs. MIN | 62.9% | -170.0 |
-| Ja'Marr Chase | WR | CIN vs. WAS | 60.5% | -153.0 |
-| Javonte Williams | RB | DAL vs. TEN | 58.0% | -138.0 |
-| Bucky Irving | RB | TB vs. DET | 57.7% | -136.0 |
-| CeeDee Lamb | WR | DAL vs. TEN | 56.2% | -128.0 |
+| Christian McCaffrey | RB | SF vs. MIN | 63.5% | -174.0 |
+| Ja'Marr Chase | WR | CIN vs. WAS | 60.0% | -150.0 |
+| Bucky Irving | RB | TB vs. DET | 59.5% | -147.0 |
+| Javonte Williams | RB | DAL vs. TEN | 58.6% | -142.0 |
+| CeeDee Lamb | WR | DAL vs. TEN | 56.8% | -131.0 |
 | D'Andre Swift | RB | CHI vs. NO | 55.7% | -126.0 |
 <!-- LIVE_PICKS_END -->
 
