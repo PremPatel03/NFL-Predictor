@@ -195,8 +195,20 @@ def run_sunday_predictions() -> pd.DataFrame:
     results.to_csv("data/latest_predictions.csv", index=False)
     results.to_csv(f"data/history/game_preds_{season_val}_w{week_val}.csv", index=False)
 
-    print("\n=== WEEKLY NFL PREDICTIONS (VEGAS +EV & STADIUM WEATHER) ===")
-    print(results.to_string(index=False))
+    print("\n=== WEEKLY NFL PREDICTIONS ===")
+    log_cols = [
+        "gameday",
+        "time_slot",
+        "away_team",
+        "home_team",
+        "predicted_winner",
+        "pick_ml_str",
+        "win_confidence",
+        "model_edge",
+        "ev_flag",
+        "weather_summary",
+    ]
+    print(results[[c for c in log_cols if c in results.columns]].to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
     return results
 
