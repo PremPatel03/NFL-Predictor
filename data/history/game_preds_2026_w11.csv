@@ -1,14 +1,14 @@
 gameday,gametime,time_slot,away_team,home_team,spread_line,total_line,predicted_winner,pick_ml_str,pick_ml,win_confidence,vegas_pick_prob,model_edge,ev_flag,home_win_prob,away_win_prob
 2026-11-22,1:00 PM ET,Sun 1:00 PM,MIA,BUF,16.5,44.5,BUF,-1440,-1440.0,84.8,89.9,-5.1,Market Aligned,84.8,15.2
-2026-11-22,1:00 PM ET,Sun 1:00 PM,NO,CHI,11.5,48.5,CHI,-588,-588.0,80.2,82.2,-2.0,Market Aligned,80.2,19.8
+2026-11-22,1:00 PM ET,Sun 1:00 PM,NO,CHI,11.5,48.5,CHI,-640,-640.0,80.2,83.1,-2.9,Market Aligned,80.2,19.8
 2026-11-22,1:00 PM ET,Sun 1:00 PM,ARI,KC,15.5,40.5,KC,-1400,-1400.0,79.4,89.7,-10.3,Market Aligned,79.4,20.6
 2026-11-22,4:25 PM ET,Sun 4:00 PM,LV,DEN,10.0,40.5,DEN,-570,-570.0,75.1,81.8,-6.7,Market Aligned,75.1,24.9
 2026-11-22,1:00 PM ET,Sun 1:00 PM,TEN,DAL,8.5,54.5,DAL,-386,-386.0,72.8,76.3,-3.5,Market Aligned,72.8,27.2
-2026-11-23,8:15 PM ET,Mon Night,CIN,WAS,-6.5,53.5,CIN,-309,-309.0,72.5,72.6,-0.1,Market Aligned,27.5,72.5
-2026-11-22,1:00 PM ET,Sun 1:00 PM,JAX,NYG,-6.0,46.5,JAX,-266,-266.0,70.5,69.9,0.6,Slight Edge,29.5,70.5
-2026-11-22,1:00 PM ET,Sun 1:00 PM,TB,DET,6.0,44.5,DET,-279,-279.0,67.8,70.8,-3.0,Market Aligned,67.8,32.2
+2026-11-23,8:15 PM ET,Mon Night,CIN,WAS,-6.5,53.5,CIN,-308,-308.0,72.5,72.5,0.0,Market Aligned,27.5,72.5
+2026-11-22,1:00 PM ET,Sun 1:00 PM,JAX,NYG,-6.0,46.5,JAX,-266,-266.0,70.5,69.8,0.7,Slight Edge,29.5,70.5
+2026-11-22,1:00 PM ET,Sun 1:00 PM,TB,DET,6.0,44.5,DET,-279,-279.0,67.8,70.7,-2.9,Market Aligned,67.8,32.2
 2026-11-19,8:15 PM ET,Thu Night,IND,HOU,12.5,43.5,HOU,-740,-740.0,65.7,84.7,-19.0,Market Aligned,65.7,34.3
 2026-11-22,8:20 PM ET,Sun Night,MIN,SF,3.0,46.5,SF,-163,-163.0,63.4,59.6,3.8,Slight Edge,63.4,36.6
 2026-11-22,4:25 PM ET,Sun 4:00 PM,PIT,PHI,-4.5,37.5,PIT,-216,-216.0,58.8,65.7,-6.9,Market Aligned,41.2,58.8
 2026-11-22,4:05 PM ET,Sun 4:00 PM,NYJ,LAC,3.0,41.5,NYJ,+135,135.0,53.7,40.8,12.9, +EV Value,46.3,53.7
-2026-11-22,1:00 PM ET,Sun 1:00 PM,BAL,CAR,2.5,43.5,CAR,-136,-136.0,52.6,55.5,-2.9,Market Aligned,52.6,47.4
+2026-11-22,1:00 PM ET,Sun 1:00 PM,BAL,CAR,2.5,43.5,CAR,-136,-136.0,52.6,55.3,-2.7,Market Aligned,52.6,47.4
