@@ -87,6 +87,18 @@ def grade_all_games(season: int) -> None:
         merged["brier"] = (home_prob_01 - merged["home_won"]) ** 2
         all_graded.append(merged)
 
+        # Calculate 1-unit moneyline profit/loss (if pick_ml is available)
+        if "pick_ml" in merged.columns:
+            ml = pd.to_numeric(merged["pick_ml"], errors="coerce")
+            win_payout = np.where(ml > 0, ml / 100.0, np.where(ml < 0, 100.0 / ml.abs(), 0.0))
+            merged["unit_profit"] = np.where(
+                ml.isna(),
+                0.0,
+                np.where(merged["correct"] == 1, win_payout, -1.0),
+            ).round(2)
+        else:
+            merged["unit_profit"] = 0.0
+
     if not all_graded:
         print("No completed games matched archived prediction files yet.")
         return

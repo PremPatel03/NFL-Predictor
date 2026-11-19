@@ -80,6 +80,7 @@ def run_sunday_predictions() -> pd.DataFrame:
     """
     Loads the pregame feature snapshot, injects live Sunday QB injury flags,
     computes calibrated win probabilities with `nfl_win_prob_v3.joblib`,
+    compares model probabilities against no-vig Vegas moneylines (+EV edge),
     prints the weekly matchup table, and writes `data/latest_predictions.csv`.
     """
     # Load the trained v3 model artifact and its exact ordered feature list
@@ -93,6 +94,9 @@ def run_sunday_predictions() -> pd.DataFrame:
     if slate.empty:
         print("No games found in data/pregame_features.parquet for the active week.")
         return slate
+
+    season_val = int(slate["season"].iloc[0])
+    week_val = int(slate["week"].iloc[0])
 
     # Query ESPN for live Sunday morning starting QB inactive status
     qb_outs = get_live_qb_outs(slate)
@@ -110,12 +114,46 @@ def run_sunday_predictions() -> pd.DataFrame:
     )
     slate["win_confidence"] = np.maximum(slate["home_win_prob"], slate["away_win_prob"])
 
-    pd.set_option("display.width", 1000)
-
-    # Format clean output table sorted by highest model confidence
+    # Format kickoff windows
     parsed_slots = slate.apply(_format_kickoff_slot, axis=1)
     slate["gametime"] = [p[0] for p in parsed_slots]
     slate["time_slot"] = [p[1] for p in parsed_slots]
+
+    # Merge Vegas lines from nflverse schedule BEFORE building output_cols
+    sched_lines = nfl.load_schedules([season_val]).to_pandas()[
+        ["game_id", "home_moneyline", "away_moneyline", "spread_line", "total_line"]
+    ]
+    for col in ["home_moneyline", "away_moneyline", "spread_line", "total_line"]:
+        if col in slate.columns:
+            slate = slate.drop(columns=[col])
+    slate = slate.merge(sched_lines, on="game_id", how="left")
+
+    # Compute No-Vig Vegas Implied Probabilities
+    raw_home = slate["home_moneyline"].apply(_american_to_implied_prob)
+    raw_away = slate["away_moneyline"].apply(_american_to_implied_prob)
+    vig_sum = raw_home + raw_away
+
+    slate["vegas_home_prob"] = np.where(vig_sum > 0, (raw_home / vig_sum) * 100.0, 50.0).round(1)
+    slate["vegas_away_prob"] = np.where(vig_sum > 0, (raw_away / vig_sum) * 100.0, 50.0).round(1)
+
+    # Evaluate edge on the model's predicted winner
+    home_picked = slate["predicted_winner"] == slate["home_team"]
+    slate["pick_ml"] = np.where(home_picked, slate["home_moneyline"], slate["away_moneyline"])
+    slate["pick_ml_str"] = slate["pick_ml"].apply(_format_american)
+    slate["vegas_pick_prob"] = np.where(home_picked, slate["vegas_home_prob"], slate["vegas_away_prob"])
+    slate["model_edge"] = (slate["win_confidence"] - slate["vegas_pick_prob"]).round(1)
+
+    # Flag +EV Value Picks where model probability exceeds no-vig Vegas probability by >= 4.0%
+    slate["ev_flag"] = np.where(
+        slate["pick_ml"].isna(),
+        "No Line",
+        np.where(slate["model_edge"] >= 4.0, " +EV Value", np.where(slate["model_edge"] > 0, "Slight Edge", "Market Aligned")),
+    )
+
+    if "elo_diff" in slate.columns:
+        slate["elo_diff"] = slate["elo_diff"].round(1)
+
+    pd.set_option("display.width", 1000)
 
     output_cols = [
         "gameday",
@@ -123,25 +161,27 @@ def run_sunday_predictions() -> pd.DataFrame:
         "time_slot",
         "away_team",
         "home_team",
+        "spread_line",
+        "total_line",
         "predicted_winner",
+        "pick_ml_str",
+        "pick_ml",
         "win_confidence",
+        "vegas_pick_prob",
+        "model_edge",
+        "ev_flag",
         "home_win_prob",
         "away_win_prob",
     ]
     available_cols = [c for c in output_cols if c in slate.columns]
     results = slate[available_cols].sort_values("win_confidence", ascending=False).reset_index(drop=True)
 
-    if "elo_diff" in slate.columns:
-        slate["elo_diff"] = slate["elo_diff"].round(1)
-
-    # Save to CSV so GitHub Actions automatically commits the updated picks to the repo
+    # Save to CSV & archive snapshot AFTER all Vegas +EV columns are attached
     os.makedirs("data/history", exist_ok=True)
-    season_val = int(slate["season"].iloc[0])
-    week_val = int(slate["week"].iloc[0])
     results.to_csv("data/latest_predictions.csv", index=False)
     results.to_csv(f"data/history/game_preds_{season_val}_w{week_val}.csv", index=False)
 
-    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED) ===")
+    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED + VEGAS EDGE) ===")
     print(results.to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
     return results
@@ -179,6 +219,21 @@ def _format_kickoff_slot(row: pd.Series) -> tuple[str, str]:
         slot = dow
 
     return (formatted_time, slot)
+
+def _american_to_implied_prob(odds: float) -> float:
+    """Converts American moneyline odds (e.g., -150 or +130) into raw implied probability (0..1)."""
+    if pd.isna(odds) or odds == 0:
+        return np.nan
+    if odds < 0:
+        return abs(odds) / (abs(odds) + 100.0)
+    return 100.0 / (odds + 100.0)
+
+def _format_american(odds: float) -> str:
+    """Formats numeric American odds as a clean string ('+135' or '-150')."""
+    if pd.isna(odds) or odds == 0:
+        return "N/A"
+    val = int(round(odds))
+    return f"+{val}" if val > 0 else f"{val}"
 
 if __name__ == "__main__":
     run_sunday_predictions()

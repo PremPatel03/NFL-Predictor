@@ -1,11 +1,11 @@
 """
-NFL-Predictor Interactive Web Dashboard (`Dashboard.py`).
+NFL-Predictor Interactive Web Dashboard (`dashboard.py`).
 
 Reads weekly pre-kickoff predictions (`data/latest_predictions.csv`,
 `data/latest_player_predictions.csv`) and cumulative grading logs
 (`data/season_game_tracker.csv`, `data/season_player_tracker.csv`)
-to provide a live, interactive UI for game picks, matchup breakdowns,
-player prop lookups, and model calibration tracking.
+to provide a live, interactive UI for game picks, Vegas +EV edges,
+matchup breakdowns, player prop lookups, and model calibration tracking.
 """
 
 import os
@@ -34,13 +34,11 @@ def format_matchup_label(row: pd.Series) -> str:
     slot = f" ({row['time_slot']})" if "time_slot" in row and pd.notna(row["time_slot"]) else ""
     return f"{row['away_team']} @ {row['home_team']}{slot}"
 
-# ---------------------------------------------------------------------------
 # Header & Top KPI Summary Bar
-# ---------------------------------------------------------------------------
-st.title("🏈 NFL-Predictor Dashboard")
+st.title("NFL-Predictor Dashboard")
 st.caption(
-    "Automated weekly game win probabilities, player yardage ceilings, and Anytime TD odds — "
-    "updated every Sunday morning before kickoff."
+    "Automated weekly game win probabilities, Vegas +EV market edges, player yardage ceilings, "
+    "and Anytime TD odds — updated every Sunday morning before kickoff."
 )
 
 games_df = load_csv(GAME_PRED_PATH)
@@ -51,7 +49,16 @@ player_tracker_df = load_csv(PLAYER_TRACKER_PATH)
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 with kpi1:
-    st.metric("Games on Current Slate", len(games_df) if not games_df.empty else "—")
+    if not games_df.empty and "model_edge" in games_df.columns and games_df["model_edge"].notna().any():
+        best_ev = games_df.sort_values("model_edge", ascending=False).iloc[0]
+        ml_label = f" ({best_ev['pick_ml_str']})" if "pick_ml_str" in best_ev and pd.notna(best_ev["pick_ml_str"]) else ""
+        st.metric(
+            "Top Vegas +EV Edge",
+            f"{best_ev['predicted_winner']}{ml_label}",
+            delta=f"{best_ev['model_edge']:+.1f}% vs. Market",
+        )
+    else:
+        st.metric("Games on Current Slate", len(games_df) if not games_df.empty else "—")
 
 with kpi2:
     if not games_df.empty and "win_confidence" in games_df.columns:
@@ -83,7 +90,15 @@ with kpi4:
     if not game_tracker_df.empty and "correct" in game_tracker_df.columns:
         wins = int(game_tracker_df["correct"].sum())
         total = len(game_tracker_df)
-        st.metric("Season Pick Record", f"{wins}-{total - wins} ({wins / total:.1%})")
+        roi_delta = None
+        if "unit_profit" in game_tracker_df.columns:
+            units = float(game_tracker_df["unit_profit"].sum())
+            roi_delta = f"{units:+.2f} Units (1u ML)"
+        st.metric(
+            "Season Pick Record",
+            f"{wins}-{total - wins} ({wins / total:.1%})",
+            delta=roi_delta,
+        )
     else:
         st.metric("Season Pick Record", "Tracking Live")
 
@@ -99,12 +114,12 @@ tab_games, tab_matchups, tab_players, tab_tracker = st.tabs(
     ]
 )
 
-# TAB 1: WEEKLY GAME PICKS
+# TAB 1: WEEKLY GAME PICKS & VEGAS +EV EDGE
 with tab_games:
     if games_df.empty:
         st.warning("No game predictions found yet. Run `python src/build_features.py && python src/predict_sunday.py`.")
     else:
-        col_filter1, col_filter2 = st.columns([2, 1])
+        col_filter1, col_filter2, col_filter3 = st.columns([1.8, 1.5, 1.5])
         with col_filter1:
             if "time_slot" in games_df.columns:
                 slots = ["All Kickoff Slots"] + sorted(games_df["time_slot"].dropna().unique().tolist())
@@ -113,18 +128,23 @@ with tab_games:
                 selected_slot = "All Kickoff Slots"
         with col_filter2:
             min_conf = st.slider("Minimum Win Confidence (%)", 50, 90, 50)
+        with col_filter3:
+            st.write("")
+            only_ev = st.checkbox("Show +EV Value Picks Only (≥ +4.0% Edge)")
 
         filtered_games = games_df.copy()
         if selected_slot != "All Kickoff Slots" and "time_slot" in filtered_games.columns:
             filtered_games = filtered_games[filtered_games["time_slot"] == selected_slot]
         if "win_confidence" in filtered_games.columns:
             filtered_games = filtered_games[filtered_games["win_confidence"] >= min_conf]
+        if only_ev and "model_edge" in filtered_games.columns:
+            filtered_games = filtered_games[filtered_games["model_edge"] >= 4.0]
 
         st.subheader(f"Projected Game Outcomes ({len(filtered_games)} Matchups)")
 
         for _, row in filtered_games.iterrows():
             with st.container(border=True):
-                c1, c2, c3, c4 = st.columns([2.2, 2.2, 2.5, 1.5])
+                c1, c2, c3, c4 = st.columns([2.2, 2.4, 2.4, 1.5])
                 with c1:
                     st.markdown(f"**{row['away_team']} @ {row['home_team']}**")
                     kickoff_str = f"{row['gameday']}"
@@ -134,9 +154,27 @@ with tab_games:
                         kickoff_str += f" ({row['time_slot']})"
                     st.caption(kickoff_str)
 
+                    # Display Vegas spread & over/under total if available
+                    vegas_bits = []
+                    if "spread_line" in row and pd.notna(row["spread_line"]):
+                        sp = float(row["spread_line"])
+                        fav = row["home_team"] if sp > 0 else row["away_team"]
+                        vegas_bits.append(f"Line: {fav} -{abs(sp):.1f}")
+                    if "total_line" in row and pd.notna(row["total_line"]):
+                        vegas_bits.append(f"O/U: {float(row['total_line']):.1f}")
+                    if vegas_bits:
+                        st.caption(" | ".join(vegas_bits))
+
                 with c2:
-                    st.markdown(f"Projected Winner: **{row['predicted_winner']}**")
-                    st.caption(f"Model Confidence: **{row['win_confidence']:.1f}%**")
+                    ml_str = f" ({row['pick_ml_str']})" if "pick_ml_str" in row and pd.notna(row["pick_ml_str"]) else ""
+                    st.markdown(f"Projected Winner: **{row['predicted_winner']}{ml_str}**")
+                    if "vegas_pick_prob" in row and "model_edge" in row and pd.notna(row["model_edge"]):
+                        st.caption(
+                            f"Model: **{row['win_confidence']:.1f}%** vs. Vegas: **{row['vegas_pick_prob']:.1f}%** "
+                            f"(Edge: **{row['model_edge']:+.1f}%**)"
+                        )
+                    else:
+                        st.caption(f"Model Confidence: **{row['win_confidence']:.1f}%**")
 
                 with c3:
                     home_p = float(row["home_win_prob"]) / 100.0
@@ -146,9 +184,13 @@ with tab_games:
                     )
 
                 with c4:
+                    edge_val = float(row["model_edge"]) if "model_edge" in row and pd.notna(row["model_edge"]) else 0.0
                     conf = float(row["win_confidence"])
-                    if conf >= 75.0:
-                        st.success("Lock Pick")
+
+                    if edge_val >= 4.0:
+                        st.success(f"+EV Value ({edge_val:+.1f}%)")
+                    elif conf >= 75.0:
+                        st.info("Lock Pick")
                     elif conf >= 60.0:
                         st.info("Solid Lean")
                     else:
@@ -246,7 +288,7 @@ with tab_players:
             height=520,
         )
 
-# CUMULATIVE SEASON ACCURACY TRACKER
+# TAB 4: CUMULATIVE SEASON ACCURACY TRACKER
 with tab_tracker:
     st.subheader("Post-Game Graded Accuracy & Calibration")
     st.caption("Automatically updated every Tuesday morning after Monday Night Football via GitHub Actions.")
@@ -258,18 +300,21 @@ with tab_tracker:
         )
     else:
         if not game_tracker_df.empty:
-            st.markdown("#### Game Winner Accuracy by Week")
-            weekly_summary = (
-                game_tracker_df.groupby(["season", "week"], as_index=False)
-                .agg(
-                    Games=("correct", "count"),
-                    Correct=("correct", "sum"),
-                    Accuracy=("correct", "mean"),
-                    Brier_Score=("brier", "mean"),
-                )
-            )
+            st.markdown("#### Game Winner Accuracy & ROI by Week")
+            agg_dict = {
+                "Games": ("correct", "count"),
+                "Correct": ("correct", "sum"),
+                "Accuracy": ("correct", "mean"),
+                "Brier_Score": ("brier", "mean"),
+            }
+            if "unit_profit" in game_tracker_df.columns:
+                agg_dict["Units_Won"] = ("unit_profit", "sum")
+
+            weekly_summary = game_tracker_df.groupby(["season", "week"], as_index=False).agg(**agg_dict)
             weekly_summary["Accuracy"] = (weekly_summary["Accuracy"] * 100).round(1)
             weekly_summary["Brier_Score"] = weekly_summary["Brier_Score"].round(4)
+            if "Units_Won" in weekly_summary.columns:
+                weekly_summary["Units_Won"] = weekly_summary["Units_Won"].round(2)
             st.dataframe(weekly_summary, use_container_width=True, hide_index=True)
 
         if not player_tracker_df.empty:
