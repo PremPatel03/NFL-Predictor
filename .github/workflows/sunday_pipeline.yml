@@ -6,7 +6,6 @@ on:
     - cron: "40 16 * * 0"
   workflow_dispatch:
 
-
 jobs:
   predict:
     runs-on: ubuntu-latest
@@ -28,19 +27,17 @@ jobs:
       - name: Build pregame features
         run: PYTHONPATH=src python src/build_features.py
 
-      - name: Run Sunday predictions
+      - name: Run Sunday predictions & update README
         if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
         run: |
           PYTHONPATH=src python src/predict_sunday.py
           PYTHONPATH=src python src/predict_players.py
+          python src/update_readme.py
 
-      - name: Commit updated predictions to GitHub
-        if: github.event.schedule == '40 16 * * 0' || github.event_name == 'workflow_dispatch'
+      - name: Commit updated predictions and README
         run: |
           git config user.name "nfl-predictor-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data/latest_predictions.csv data/latest_player_predictions.csv data/pregame_features.parquet
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update Sunday NFL game and player predictions"
+          git add data/ README.md
+          git diff --staged --quiet || git commit -m "Update weekly NFL predictions and live README tables"
           git push
-
-          

@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import requests
 import os
+from weather import get_game_weather
 
 # ESPN public scoreboard & game summary endpoints for live Sunday morning injury reports
 SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
@@ -81,16 +82,14 @@ def run_sunday_predictions() -> pd.DataFrame:
     Loads the pregame feature snapshot, injects live Sunday QB injury flags,
     computes calibrated win probabilities with `nfl_win_prob_v3.joblib`,
     compares model probabilities against no-vig Vegas moneylines (+EV edge),
+    fetches kickoff-hour stadium weather via Open-Meteo,
     prints the weekly matchup table, and writes `data/latest_predictions.csv`.
     """
-    # Load the trained v3 model artifact and its exact ordered feature list
     artifact = joblib.load("models/nfl_win_prob_v3.joblib")
     model = artifact["model"]
     feature_cols = artifact["features"]
 
-    # Load the pre-game feature snapshot built earlier by `build_features.py`
     slate = pd.read_parquet("data/pregame_features.parquet")
-
     if slate.empty:
         print("No games found in data/pregame_features.parquet for the active week.")
         return slate
@@ -103,32 +102,32 @@ def run_sunday_predictions() -> pd.DataFrame:
     slate["home_qb_out"] = slate["home_team"].map(qb_outs).fillna(0).astype(int)
     slate["away_qb_out"] = slate["away_team"].map(qb_outs).fillna(0).astype(int)
 
-    # Predict calibrated home win probabilities (class 1 = home_win)
+    # Predict calibrated home win probabilities
     X_live = slate[feature_cols].fillna(0.0)
     home_probs = model.predict_proba(X_live)[:, 1]
 
     slate["home_win_prob"] = (home_probs * 100).round(1)
     slate["away_win_prob"] = ((1.0 - home_probs) * 100).round(1)
-    slate["predicted_winner"] = np.where(
-        home_probs >= 0.5, slate["home_team"], slate["away_team"]
-    )
+    slate["predicted_winner"] = np.where(home_probs >= 0.5, slate["home_team"], slate["away_team"])
     slate["win_confidence"] = np.maximum(slate["home_win_prob"], slate["away_win_prob"])
 
-    # Format kickoff windows
-    parsed_slots = slate.apply(_format_kickoff_slot, axis=1)
-    slate["gametime"] = [p[0] for p in parsed_slots]
-    slate["time_slot"] = [p[1] for p in parsed_slots]
-
-    # Merge Vegas lines from nflverse schedule BEFORE building output_cols
+    # Merge Vegas lines, stadium roof, and 24-hour kickoff time from schedule
     sched_lines = nfl.load_schedules([season_val]).to_pandas()[
-        ["game_id", "home_moneyline", "away_moneyline", "spread_line", "total_line"]
-    ]
-    for col in ["home_moneyline", "away_moneyline", "spread_line", "total_line"]:
+        ["game_id", "home_moneyline", "away_moneyline", "spread_line", "total_line", "roof", "gametime"]
+    ].rename(columns={"gametime": "raw_gametime"})
+
+    for col in ["home_moneyline", "away_moneyline", "spread_line", "total_line", "roof", "raw_gametime"]:
         if col in slate.columns:
             slate = slate.drop(columns=[col])
     slate = slate.merge(sched_lines, on="game_id", how="left")
 
-    # Compute No-Vig Vegas Implied Probabilities
+    # Format 12-hour ET kickoff times & slate slots
+    slate["gametime"] = slate["raw_gametime"]
+    parsed_slots = slate.apply(_format_kickoff_slot, axis=1)
+    slate["gametime"] = [p[0] for p in parsed_slots]
+    slate["time_slot"] = [p[1] for p in parsed_slots]
+
+    # Compute No-Vig Vegas Implied Probabilities & +EV Edge
     raw_home = slate["home_moneyline"].apply(_american_to_implied_prob)
     raw_away = slate["away_moneyline"].apply(_american_to_implied_prob)
     vig_sum = raw_home + raw_away
@@ -136,19 +135,31 @@ def run_sunday_predictions() -> pd.DataFrame:
     slate["vegas_home_prob"] = np.where(vig_sum > 0, (raw_home / vig_sum) * 100.0, 50.0).round(1)
     slate["vegas_away_prob"] = np.where(vig_sum > 0, (raw_away / vig_sum) * 100.0, 50.0).round(1)
 
-    # Evaluate edge on the model's predicted winner
     home_picked = slate["predicted_winner"] == slate["home_team"]
     slate["pick_ml"] = np.where(home_picked, slate["home_moneyline"], slate["away_moneyline"])
     slate["pick_ml_str"] = slate["pick_ml"].apply(_format_american)
     slate["vegas_pick_prob"] = np.where(home_picked, slate["vegas_home_prob"], slate["vegas_away_prob"])
     slate["model_edge"] = (slate["win_confidence"] - slate["vegas_pick_prob"]).round(1)
 
-    # Flag +EV Value Picks where model probability exceeds no-vig Vegas probability by >= 4.0%
     slate["ev_flag"] = np.where(
         slate["pick_ml"].isna(),
         "No Line",
-        np.where(slate["model_edge"] >= 4.0, " +EV Value", np.where(slate["model_edge"] > 0, "Slight Edge", "Market Aligned")),
+        np.where(slate["model_edge"] >= 4.0, " +EV Value", np.where(slate["model_edge"] > 0, " Slight Edge", "Market Aligned")),
     )
+
+    # 5. Fetch kickoff-hour stadium weather from Open-Meteo
+    weather_rows = [
+        get_game_weather(
+            r["home_team"],
+            str(r["gameday"]),
+            str(r.get("raw_gametime", "13:00")),
+            r.get("roof"),
+        )
+        for _, r in slate.iterrows()
+    ]
+    weather_df = pd.DataFrame(weather_rows)
+    for col in ["weather_summary", "temp_f", "wind_mph", "weather_alert"]:
+        slate[col] = weather_df[col].values
 
     if "elo_diff" in slate.columns:
         slate["elo_diff"] = slate["elo_diff"].round(1)
@@ -170,18 +181,21 @@ def run_sunday_predictions() -> pd.DataFrame:
         "vegas_pick_prob",
         "model_edge",
         "ev_flag",
+        "weather_summary",
+        "temp_f",
+        "wind_mph",
+        "weather_alert",
         "home_win_prob",
         "away_win_prob",
     ]
     available_cols = [c for c in output_cols if c in slate.columns]
     results = slate[available_cols].sort_values("win_confidence", ascending=False).reset_index(drop=True)
 
-    # Save to CSV & archive snapshot AFTER all Vegas +EV columns are attached
     os.makedirs("data/history", exist_ok=True)
     results.to_csv("data/latest_predictions.csv", index=False)
     results.to_csv(f"data/history/game_preds_{season_val}_w{week_val}.csv", index=False)
 
-    print("\n=== WEEKLY NFL PREDICTIONS (STARTER-FILTERED + VEGAS EDGE) ===")
+    print("\n=== WEEKLY NFL PREDICTIONS (VEGAS +EV & STADIUM WEATHER) ===")
     print(results.to_string(index=False))
     print("\nSaved predictions to data/latest_predictions.csv")
     return results

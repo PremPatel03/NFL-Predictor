@@ -165,6 +165,9 @@ with tab_games:
                     if vegas_bits:
                         st.caption(" | ".join(vegas_bits))
 
+                    if "weather_summary" in row and pd.notna(row["weather_summary"]):
+                        st.caption(f"Weather: {row['weather_summary']}")
+
                 with c2:
                     ml_str = f" ({row['pick_ml_str']})" if "pick_ml_str" in row and pd.notna(row["pick_ml_str"]) else ""
                     st.markdown(f"Projected Winner: **{row['predicted_winner']}{ml_str}**")
@@ -195,6 +198,9 @@ with tab_games:
                         st.info("Solid Lean")
                     else:
                         st.warning("Toss-Up")
+                    alert_val = str(row.get("weather_alert", "Normal"))
+                    if alert_val not in {"Normal", "Indoor", "nan", "None"}:
+                        st.warning(f"Weather Alert: {alert_val}")
 
 # TAB 2: FULL GAME OFFENSIVE BREAKDOWN
 with tab_matchups:

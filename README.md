@@ -27,6 +27,43 @@ Instead of relying on static season averages or manual spreadsheets, the system 
 
 ## Where to See the Latest Predictions
 
+<!-- LIVE_PICKS_START -->
+*Last automatically updated: **2026-11-19 18:05 UTC***
+
+### Current Slate: Game Picks & Vegas +EV Edges
+
+| Matchup | Kickoff | Pick | Win Prob | Vegas Edge | Signal | Weather |
+| --- | --- | --- | --- | --- | --- | --- |
+| MIA @ BUF | 2026-11-22 1:00 PM ET | BUF (-1440) | 84.8% | -5.1% | Market Aligned | 60°F • Wind 10 mph |
+| NO @ CHI | 2026-11-22 1:00 PM ET | CHI (-640) | 80.2% | -2.9% | Market Aligned | 57°F • Wind 9 mph • Precip 82% |
+| ARI @ KC | 2026-11-22 1:00 PM ET | KC (-1400) | 79.4% | -10.3% | Market Aligned | 52°F • Wind 16 mph |
+| LV @ DEN | 2026-11-22 4:25 PM ET | DEN (-570) | 75.1% | -6.7% | Market Aligned | 47°F • Wind 4 mph |
+| TEN @ DAL | 2026-11-22 1:00 PM ET | DAL (-388) | 72.8% | -3.6% | Market Aligned | 63°F • Wind 14 mph |
+| CIN @ WAS | 2026-11-23 8:15 PM ET | CIN (-308) | 72.5% | +0.0% | Market Aligned | 48°F • Wind 12 mph |
+| JAX @ NYG | 2026-11-22 1:00 PM ET | JAX (-266) | 70.5% | +0.7% |  Slight Edge | 55°F • Wind 10 mph |
+| TB @ DET | 2026-11-22 1:00 PM ET | DET (-279) | 67.8% | -3.0% | Market Aligned | Dome / Indoor (70°F) |
+| IND @ HOU | 2026-11-19 8:15 PM ET | HOU (-740) | 65.7% | -18.9% | Market Aligned | 67°F • Wind 2 mph |
+| MIN @ SF | 2026-11-22 8:20 PM ET | SF (-163) | 63.4% | +3.8% |  Slight Edge | 54°F • Wind 4 mph |
+| PIT @ PHI | 2026-11-22 4:25 PM ET | PIT (-216) | 58.8% | -6.9% | Market Aligned | 61°F • Wind 10 mph • Precip 66% |
+| NYJ @ LAC | 2026-11-22 4:05 PM ET | NYJ (135) | 53.7% | +12.9% |  +EV Value | Dome / Indoor (70°F) |
+| BAL @ CAR | 2026-11-22 1:00 PM ET | CAR (-142) | 52.6% | -3.7% | Market Aligned | 63°F • Wind 4 mph |
+
+### Top 10 Anytime Touchdown Leaders
+
+| Player | Pos | Matchup | Anytime TD % | Fair Odds |
+| --- | --- | --- | --- | --- |
+| Jahmyr Gibbs | RB | DET vs. TB | 78.0% | -354.0 |
+| James Cook | RB | BUF vs. MIA | 72.0% | -257.0 |
+| Kenneth Walker III | RB | KC vs. ARI | 67.9% | -212.0 |
+| Chuba Hubbard | RB | CAR vs. BAL | 63.9% | -177.0 |
+| Christian McCaffrey | RB | SF vs. MIN | 62.9% | -170.0 |
+| Ja'Marr Chase | WR | CIN vs. WAS | 60.5% | -153.0 |
+| Javonte Williams | RB | DAL vs. TEN | 58.0% | -138.0 |
+| Bucky Irving | RB | TB vs. DET | 57.7% | -136.0 |
+| CeeDee Lamb | WR | DAL vs. TEN | 56.2% | -128.0 |
+| D'Andre Swift | RB | CHI vs. NO | 55.7% | -126.0 |
+<!-- LIVE_PICKS_END -->
+
 * **Interactive Web App :** **[nfl-predictor-prem.streamlit.app](https://nfl-predictor-prem.streamlit.app/)** — Browse weekly game picks, inspect full head-to-head offensive breakdowns, search any player, and view live season accuracy metrics.
 * **Raw Weekly CSVs in This Repo:**
   * **Weekly Game Winners:** [`data/latest_predictions.csv`](data/latest_predictions.csv)
