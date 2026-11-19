@@ -241,7 +241,7 @@ with tab_players:
     else:
         f1, f2, f3 = st.columns([2.5, 1.5, 1.5])
         with f1:
-            search_name = st.text_input("Search Player Name", placeholder="e.g., Zay Flowers, Jahmyr Gibbs, Patrick Mahomes")
+            search_name = st.text_input("Search Player Name", placeholder="")
         with f2:
             stat_choices = ["All Categories"] + sorted(players_df["stat_type"].dropna().unique().tolist())
             selected_stat = st.selectbox("Stat Category", stat_choices)
